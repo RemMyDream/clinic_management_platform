@@ -1,0 +1,39 @@
+@startuml
+title D3: Create a Medical Report
+
+actor "Doctor" as Doctor
+participant "Frontend (UI)\n(CreateEMR.tsx)" as UI
+participant "MedicalReportController\n(app/routers/reports.py)" as API
+participant "CRUD Layer\n(crud.py)" as CRUD
+database "PostgreSQL\nDatabase" as DB
+
+Doctor -> UI: Fill EMR form (Notes, Diagnosis, Rx)\nand click "Save"
+activate UI
+
+UI -> API: POST /medical_reports/\n(EMR data payload)
+activate API
+
+note right of API
+  Validates data using
+  Pydantic schemas
+end note
+
+API -> CRUD: create_medical_report(validatedData)
+activate CRUD
+
+CRUD -> DB: INSERT into medical_reports table
+activate DB
+
+DB --> CRUD: Return created record ID
+deactivate DB
+
+CRUD --> API: Return success object
+deactivate CRUD
+
+API --> UI: Return 200 OK & Success Message
+deactivate API
+
+UI --> Doctor: Display "Medical Record Saved"
+deactivate UI
+
+@enduml
