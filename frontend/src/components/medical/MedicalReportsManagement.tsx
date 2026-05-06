@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import styles from './MedicalReportsManagement.module.css';
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import { medicalReportApi, patientApi } from '../../services/api';
 
 type MedicalReport = {
   record_id: number;
@@ -71,20 +69,15 @@ const MedicalReportsManagement = () => {
 
   useEffect(() => {
     applyFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reports, searchFilters]);
 
   const fetchMedicalReports = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get(`${BACKEND_URL}/medical_reports/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setReports(response.data);
-    } catch (err) {
-      console.error('Failed to fetch medical reports:', err);
-      setError('Failed to load medical reports.');
+      const res = await medicalReportApi.getAll();
+      setReports(res.data);
+    } catch {
+      setError('Không thể tải báo cáo y tế.');
     } finally {
       setLoading(false);
     }
@@ -92,16 +85,9 @@ const MedicalReportsManagement = () => {
 
   const fetchPatients = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get(`${BACKEND_URL}/patients/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setPatients(response.data);
-    } catch (err) {
-      console.error('Failed to fetch patients:', err);
-    }
+      const res = await patientApi.getAll(0, 500);
+      setPatients(res.data);
+    } catch {}
   };
 
   const getPatientName = (patientId: number): string => {
@@ -174,49 +160,30 @@ const MedicalReportsManagement = () => {
   };
 
   const handleDeleteReport = async (recordId: number) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa báo cáo y tế này?')) {
-      return;
-    }
-
+    if (!window.confirm('Bạn có chắc chắn muốn xóa báo cáo y tế này?')) return;
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.delete(`${BACKEND_URL}/medical_reports/${recordId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
-      // Refresh the reports list
+      await medicalReportApi.delete(recordId);
       fetchMedicalReports();
       setSelectedReport(null);
-    } catch (err) {
-      console.error('Failed to delete medical report:', err);
+    } catch {
       alert('Xóa báo cáo y tế thất bại. Vui lòng thử lại.');
     }
   };
 
   const handleUpdateReport = async () => {
+    if (!editingReport.record_id) return;
     try {
-      const token = localStorage.getItem('accessToken');
       const updateData = {
         ...editingReport,
-        // Only include fields that have been modified
         in_day: editingReport.in_day ? editingReport.in_day.split('T')[0] : undefined,
         out_day: editingReport.out_day ? editingReport.out_day.split('T')[0] : undefined,
       };
-
-      await axios.put(`${BACKEND_URL}/medical_reports/${editingReport.record_id}`, updateData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
+      await medicalReportApi.update(editingReport.record_id, updateData);
       setShowEditModal(false);
       setEditingReport({});
       fetchMedicalReports();
       alert('Cập nhật báo cáo y tế thành công!');
-    } catch (err) {
-      console.error('Failed to update medical report:', err);
+    } catch {
       alert('Cập nhật báo cáo y tế thất bại. Vui lòng thử lại.');
     }
   };

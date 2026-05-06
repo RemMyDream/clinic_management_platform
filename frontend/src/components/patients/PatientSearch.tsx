@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './PatientSearch.css';
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import { patientApi } from '../../services/api';
 
 // Types for patient search - matching backend schema exactly
 interface PatientSearchQuery {
@@ -70,54 +68,23 @@ const PatientSearch: React.FC = () => {
     setError(null);
 
     try {
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        throw new Error('Authentication token not found');
-      }
-
-      // Calculate skip based on page
       const skip = (page - 1) * (searchParams.limit || 10);
-      
-      const searchPayload: PatientSearchQuery = {
-        ...searchParams,
-        skip
-      };
+      const searchPayload: PatientSearchQuery = { ...searchParams, skip };
 
-      // Remove empty values
-      Object.keys(searchPayload).forEach(key => {
+      Object.keys(searchPayload).forEach((key) => {
         const value = searchPayload[key as keyof PatientSearchQuery];
         if (value === '' || value === null || value === undefined) {
           delete searchPayload[key as keyof PatientSearchQuery];
         }
       });
 
-      console.log('Search payload:', searchPayload);
-
-      const response = await axios.post(
-        `${BACKEND_URL}/patients/search`,
-        searchPayload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
+      const response = await patientApi.search(searchPayload);
       setSearchResults(response.data);
-      console.log('Search results:', response.data);
-    } catch (err) {
-      console.error('Search error:', err);
-      if (axios.isAxiosError(err)) {
-        if (err.response?.status === 401) {
-          setError('Xác thực thất bại. Vui lòng đăng nhập lại.');
-        } else if (err.response?.status === 403) {
-          setError('Bạn không có quyền tìm kiếm bệnh nhân.');
-        } else {
-          setError(`Tìm kiếm thất bại: ${err.response?.data?.detail || err.message}`);
-        }
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        setError('Bạn không có quyền tìm kiếm bệnh nhân.');
       } else {
-        setError('Đã xảy ra lỗi không mong muốn trong quá trình tìm kiếm.');
+        setError(err.response?.data?.detail || 'Tìm kiếm thất bại. Vui lòng thử lại.');
       }
     } finally {
       setLoading(false);

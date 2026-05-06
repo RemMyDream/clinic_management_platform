@@ -1,173 +1,124 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
-import { Badge, CircularProgress, Modal, Box, Button, TextField, MenuItem, Select } from '@mui/material';
+import { Badge, CircularProgress, Modal, Box, Button, Chip } from '@mui/material';
 import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
 import dayjs, { Dayjs } from 'dayjs';
 import { toast } from 'react-toastify';
-import 'dayjs/locale/vi'; // Import Vietnamese locale
-import axios from 'axios';
-import './viewAppointment.css'; // Import the CSS file for styling
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import 'dayjs/locale/vi';
+import { appointmentApi, doctorApi } from '../../services/api';
+import './viewAppointment.css';
 
 type Appointment = {
+  appointment_id: number;
   patient_id: number;
   doctor_id: number;
   appointment_time: string;
   appointment_day: string;
   reason: string;
-  appointment_id: number;
+  status: string;
+  service?: string;
   doctorName?: string;
 };
+
+const STATUS_COLOR: Record<string, 'default' | 'primary' | 'success' | 'error' | 'warning'> = {
+  Scheduled: 'primary',
+  Completed: 'success',
+  Canceled: 'error',
+  'No Show': 'warning',
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  Scheduled: 'Đã lên lịch',
+  Completed: 'Hoàn thành',
+  Canceled: 'Đã hủy',
+  'No Show': 'Vắng mặt',
+};
+
+const availableTimes = ['08:30', '09:30', '10:30', '13:30', '14:30', '15:30', '16:30'];
 
 const ViewAppointment = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [_error, setError] = useState('');
   const [selectedDate, setSelectedDate] = useState(dayjs());
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [selected, setSelected] = useState<Appointment | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [rescheduleDate, setRescheduleDate] = useState('');
   const [rescheduleTime, setRescheduleTime] = useState('');
-  const [modalOpen, setModalOpen] = useState(false);
-  const [showRescheduleFields, setShowRescheduleFields] = useState(false);
+  const [showReschedule, setShowReschedule] = useState(false);
 
-  const availableTimes = ['08:30', '09:30', '10:30', '13:30', '14:30', '15:30', '16:30']; // Predefined times
-
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const token = localStorage.getItem('accessToken');
-        const response = await axios.get(`${BACKEND_URL}/appointments/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const today = new Date().toISOString().split('T')[0];
-        const upcomingAppointments = response.data.filter(
-          (appointment: Appointment) => appointment.appointment_day >= today
-        );
-
-        const appointmentsWithDoctorNames = await Promise.all(
-          upcomingAppointments.map(async (appointment: Appointment) => {
-            try {
-              const doctorResponse = await axios.get(`${BACKEND_URL}/doctors/${appointment.doctor_id}`, {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              });
-              return {
-                ...appointment,
-                doctorName: doctorResponse.data.doctor_name,
-              };
-            } catch (err) {
-              console.error(`Failed to fetch doctor name for doctor_id ${appointment.doctor_id}:`, err);
-              return {
-                ...appointment,
-                doctorName: 'Bác sĩ không xác định',
-              };
-            }
-          })
-        );
-
-        appointmentsWithDoctorNames.sort((a, b) => {
-          const dateA = new Date(`${a.appointment_day}T${a.appointment_time}`);
-          const dateB = new Date(`${b.appointment_day}T${b.appointment_time}`);
-          return dateA.getTime() - dateB.getTime();
-        });
-
-        setAppointments(appointmentsWithDoctorNames);
-      } catch (err) {
-        console.error('Failed to fetch appointments:', err);
-        setError('Không thể tải danh sách lịch hẹn.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAppointments();
+  const loadAppointments = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await appointmentApi.getMyAppointments();
+      const enriched = await Promise.all(
+        res.data.map(async (a: Appointment) => {
+          try {
+            const docRes = await doctorApi.getById(a.doctor_id);
+            return { ...a, doctorName: docRes.data.doctor_name };
+          } catch {
+            return { ...a, doctorName: 'Bác sĩ không xác định' };
+          }
+        })
+      );
+      enriched.sort((a: Appointment, b: Appointment) =>
+        new Date(`${a.appointment_day}T${a.appointment_time}`).getTime() -
+        new Date(`${b.appointment_day}T${b.appointment_time}`).getTime()
+      );
+      setAppointments(enriched);
+    } catch {
+      setError('Không thể tải danh sách lịch hẹn.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const handleAppointmentClick = (appointment: Appointment) => {
-    setSelectedAppointment(appointment);
-    setModalOpen(true);
+  useEffect(() => { loadAppointments(); }, [loadAppointments]);
+
+  const handleCancel = async () => {
+    if (!selected) return;
+    try {
+      await appointmentApi.cancel(selected.appointment_id);
+      toast.success('Đã hủy lịch hẹn.');
+      setModalOpen(false);
+      loadAppointments();
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Không thể hủy lịch hẹn.');
+    }
   };
 
-  const handleCancelAppointment = async () => {
-    if (!selectedAppointment) return;
-
+  const handleReschedule = async () => {
+    if (!selected || !rescheduleDate || !rescheduleTime) return;
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.delete(`${BACKEND_URL}/appointments/${selectedAppointment.appointment_id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      await appointmentApi.update(selected.appointment_id, {
+        appointment_day: rescheduleDate,
+        appointment_time: rescheduleTime,
       });
-      setAppointments((prev) =>
-        prev.filter((appointment) => appointment.appointment_id !== selectedAppointment.appointment_id)
-      );
+      toast.success('Đã thay đổi lịch hẹn!');
       setModalOpen(false);
-    } catch (err) {
-      console.error('Failed to cancel appointment:', err);
-      setError('Không thể hủy lịch hẹn.');
-      throw new Error('Failed to cancel appointment.');
+      setShowReschedule(false);
+      loadAppointments();
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Không thể thay đổi lịch hẹn.');
     }
   };
 
-  const handleRescheduleAppointment = async () => {
-    if (!selectedAppointment || !rescheduleDate || !rescheduleTime) return;
-
-    try {
-      const token = localStorage.getItem('accessToken');
-      await axios.put(
-        `${BACKEND_URL}/appointments/${selectedAppointment.appointment_id}`,
-        {
-          appointment_day: rescheduleDate,
-          appointment_time: rescheduleTime,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setAppointments((prev) =>
-        prev.map((appointment) =>
-          appointment.appointment_id === selectedAppointment.appointment_id
-            ? { ...appointment, appointment_day: rescheduleDate, appointment_time: rescheduleTime }
-            : appointment
-        )
-      );
-      setModalOpen(false);
-    } catch (err) {
-      console.error('Failed to reschedule appointment:', err);
-      setError('Không thể thay đổi lịch hẹn.');
-      throw new Error('Failed to reschedule appointment.');
-    }
-  };
-
-  const handleToggleReschedule = () => {
-    setShowRescheduleFields((prev) => !prev);
-  };
-
-  const filteredAppointments = appointments.filter((appointment) =>
-    dayjs(appointment.appointment_day).isSame(selectedDate, 'day')
+  const filteredByDay = appointments.filter((a) =>
+    dayjs(a.appointment_day).isSame(selectedDate, 'day')
   );
-
-  const appointmentDates = appointments.map((appointment) => appointment.appointment_day);
+  const appointmentDates = appointments.map((a) => a.appointment_day);
 
   const CustomDay = (props: PickersDayProps) => {
     const { day, outsideCurrentMonth, ...other } = props;
-    const dateString = day.format('YYYY-MM-DD');
-    const hasAppointment = appointmentDates.includes(dateString);
-
+    const dateStr = day.format('YYYY-MM-DD');
+    const has = appointmentDates.includes(dateStr);
     return (
       <Badge
-        key={dateString}
+        key={dateStr}
         overlap="circular"
-        badgeContent={hasAppointment ? <span className="appointment-dot" /> : undefined}
+        badgeContent={has ? <span className="appointment-dot" /> : undefined}
       >
         <PickersDay day={day} outsideCurrentMonth={outsideCurrentMonth} {...other} />
       </Badge>
@@ -177,7 +128,7 @@ const ViewAppointment = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
       <div className="appointments-container">
-        <h1 className="appointments-header">Lịch hẹn sắp tới</h1>
+        <h1 className="appointments-header">Lịch hẹn của tôi</h1>
 
         {loading ? (
           <div className="loading-spinner">
@@ -187,130 +138,110 @@ const ViewAppointment = () => {
         ) : (
           <DateCalendar
             value={selectedDate}
-            onChange={(newValue: Dayjs | null) => {
-              if (newValue) setSelectedDate(newValue);
-            }}
+            onChange={(v: Dayjs | null) => { if (v) setSelectedDate(v); }}
             views={['year', 'month', 'day']}
             slots={{ day: CustomDay }}
           />
         )}
 
-        {!loading && filteredAppointments.length > 0 ? (
-          <table className="appointments-table">
-            <thead>
-              <tr>
-                <th>Giờ</th>
-                <th>Bác sĩ</th>
-                <th>Lý do</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredAppointments.map((appointment) => (
-                <tr
-                  key={appointment.appointment_id}
-                  onClick={() => handleAppointmentClick(appointment)}
-                  className="clickable-row"
-                >
-                  <td>{appointment.appointment_time}</td>
-                  <td>{appointment.doctorName}</td>
-                  <td>{appointment.reason}</td>
+        {!loading && (
+          filteredByDay.length > 0 ? (
+            <table className="appointments-table">
+              <thead>
+                <tr>
+                  <th>Giờ</th>
+                  <th>Bác sĩ</th>
+                  <th>Lý do</th>
+                  <th>Dịch vụ</th>
+                  <th>Trạng thái</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          !loading && <p>Không có lịch hẹn nào trong ngày này.</p>
+              </thead>
+              <tbody>
+                {filteredByDay.map((a) => (
+                  <tr
+                    key={a.appointment_id}
+                    onClick={() => { setSelected(a); setShowReschedule(false); setModalOpen(true); }}
+                    className="clickable-row"
+                  >
+                    <td>{a.appointment_time}</td>
+                    <td>{a.doctorName}</td>
+                    <td>{a.reason}</td>
+                    <td>{a.service || 'Khám tổng quát'}</td>
+                    <td>
+                      <Chip
+                        label={STATUS_LABEL[a.status] || a.status}
+                        color={STATUS_COLOR[a.status] || 'default'}
+                        size="small"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>Không có lịch hẹn nào trong ngày này.</p>
+          )
         )}
 
         <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <Box className="appointment-modal">
-            <h2>Thao tác với lịch hẹn</h2>
-            {selectedAppointment && (
-                <>
-                  <p><strong>Bác sĩ:</strong> {selectedAppointment.doctorName}</p>
-                  <p><strong>Ngày:</strong> {selectedAppointment.appointment_day}</p>
-                  <p><strong>Giờ:</strong> {selectedAppointment.appointment_time}</p>
+            <h2>Chi tiết lịch hẹn</h2>
+            {selected && (
+              <>
+                <p><strong>Bác sĩ:</strong> {selected.doctorName}</p>
+                <p><strong>Ngày:</strong> {selected.appointment_day}</p>
+                <p><strong>Giờ:</strong> {selected.appointment_time}</p>
+                <p><strong>Dịch vụ:</strong> {selected.service || 'Khám tổng quát'}</p>
+                <p>
+                  <strong>Trạng thái: </strong>
+                  <Chip
+                    label={STATUS_LABEL[selected.status] || selected.status}
+                    color={STATUS_COLOR[selected.status] || 'default'}
+                    size="small"
+                  />
+                </p>
 
-                  {error && (
-                  <Box mt={2} color="error.main">
-                    <p style={{ color: 'red', margin: 0 }}>{error}</p>
+                {selected.status === 'Scheduled' && (
+                  <Box display="flex" gap={2} mt={2} flexWrap="wrap">
+                    <Button variant="contained" color="error" onClick={handleCancel}>
+                      Hủy lịch hẹn
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => setShowReschedule((v) => !v)}
+                    >
+                      {showReschedule ? 'Ẩn thay đổi lịch' : 'Thay đổi lịch'}
+                    </Button>
                   </Box>
-                  )}
+                )}
 
-                  <Box display="flex" alignItems="center" gap={2} mt={2}>
-                  <Button
-                    variant="contained"
-                    color="error"
-                    onClick={async () => {
-                      try {
-                        await handleCancelAppointment();
-                        toast.success('Hủy lịch hẹn thành công!');
-                      } catch (err) {
-                        console.error('Failed to cancel appointment:', err);
-                      }
-                    }}
-                    sx={{ height: 40 }}
-                  >
-                    Hủy lịch hẹn
-                  </Button>
-
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    onClick={handleToggleReschedule}
-                    sx={{ height: 40 }}
-                  >
-                    {showRescheduleFields ? "Ẩn thay đổi lịch" : "Thay đổi lịch"}
-                  </Button>
-                  </Box>
-                  {showRescheduleFields && (
+                {showReschedule && selected.status === 'Scheduled' && (
                   <div className="reschedule-section">
-                    <h2 className="reschedule-title">Thay đổi lịch hẹn</h2>
-
+                    <h2 className="reschedule-title">Chọn lịch mới</h2>
                     <div className="form-group">
-                    <label htmlFor="reschedule-date">Ngày mới</label>
-                    <input
-                      id="reschedule-date"
-                      type="date"
-                      value={rescheduleDate}
-                      onChange={(e) => setRescheduleDate(e.target.value)}
-                    />
+                      <label>Ngày mới</label>
+                      <input
+                        type="date"
+                        value={rescheduleDate}
+                        onChange={(e) => setRescheduleDate(e.target.value)}
+                      />
                     </div>
-
                     <div className="form-group">
-                    <label htmlFor="reschedule-time">Giờ mới</label>
-                    <select
-                      id="reschedule-time"
-                      value={rescheduleTime}
-                      onChange={(e) => setRescheduleTime(e.target.value)}
-                    >
-                      <option value="" disabled>
-                      Chọn giờ
-                      </option>
-                      {availableTimes.map((time) => (
-                      <option key={time} value={time}>
-                        {time}
-                      </option>
-                      ))}
-                    </select>
+                      <label>Giờ mới</label>
+                      <select value={rescheduleTime} onChange={(e) => setRescheduleTime(e.target.value)}>
+                        <option value="" disabled>Chọn giờ</option>
+                        {availableTimes.map((t) => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
                     </div>
-
-                    <button
-                    className="confirm-button"
-                    onClick={async () => {
-                      try {
-                        await handleRescheduleAppointment();
-                        toast.success('Thay đổi lịch hẹn thành công!');
-                      } catch (err) {
-                        console.error('Failed to reschedule appointment:', err);
-                      }
-                    }}
-                    >
-                    Xác nhận thay đổi
+                    <button className="confirm-button" onClick={handleReschedule}>
+                      Xác nhận thay đổi
                     </button>
                   </div>
-                  )}
-                </>
+                )}
+              </>
             )}
           </Box>
         </Modal>

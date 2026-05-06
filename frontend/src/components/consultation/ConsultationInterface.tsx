@@ -1,10 +1,8 @@
 // components/consultation/ConsultationInterface.tsx
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import styles from './ConsultationInterface.module.css';
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import { patientApi, medicalReportApi } from '../../services/api';
 
 interface Patient {
   id: string;
@@ -72,23 +70,14 @@ const ConsultationInterface: React.FC = () => {
 
   const fetchPatientData = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      
-      // Fetch patient details
-      const patientResponse = await axios.get(`${BACKEND_URL}/patients/${patientId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setPatient(patientResponse.data);
-
-      // Fetch medical history
-      const historyResponse = await axios.get(`${BACKEND_URL}/medical_reports/patient/${patientId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setMedicalHistory(historyResponse.data.slice(0, 5)); // Last 5 records
-
+      const [patRes, histRes] = await Promise.all([
+        patientApi.getById(Number(patientId)),
+        medicalReportApi.search({ patient_id: patientId }),
+      ]);
+      setPatient(patRes.data);
+      setMedicalHistory(histRes.data.slice(0, 5));
       setLoading(false);
-    } catch (err) {
-      console.error('Error fetching patient data:', err);
+    } catch {
       setError('Không thể tải thông tin bệnh nhân');
       setLoading(false);
     }

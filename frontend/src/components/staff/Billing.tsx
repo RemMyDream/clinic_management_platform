@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import styles from './Billing.module.css';
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import { patientApi } from '../../services/api';
 
 interface Patient {
   id: number;
@@ -79,13 +77,9 @@ const Billing: React.FC = () => {
 
   const fetchPatients = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get(`${BACKEND_URL}/patients`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setPatients(response.data);
-    } catch (err) {
-      console.error('Failed to fetch patients:', err);
+      const res = await patientApi.getAll(0, 500);
+      setPatients(res.data);
+    } catch {
       setError('Không thể tải danh sách bệnh nhân.');
     } finally {
       setLoading(false);

@@ -1,9 +1,7 @@
 import React, { useState, useEffect, FormEvent, PropsWithChildren, HTMLAttributes, OlHTMLAttributes, LiHTMLAttributes } from 'react';
-import axios from 'axios';
-import ReactMarkdown from 'react-markdown'; // For rendering Markdown
+import ReactMarkdown from 'react-markdown';
 import { toast } from 'react-toastify';
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import { patientApi, chatApi } from '../services/api';
 
 // Patient data structure
 interface Patient {
@@ -90,32 +88,13 @@ const DashboardPage: React.FC = () => {
 
     useEffect(() => {
         const fetchPatients = async () => {
-            const token = localStorage.getItem('accessToken');
-            if (!token) {
-                setErrorPatients('Authentication token not found. Please log in again.');
-                setLoadingPatients(false);
-                window.location.href = '/login'; // Redirect to login
-                return;
-            }
             try {
                 setLoadingPatients(true);
-                const response = await axios.get(BACKEND_URL + '/patients/', {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                setPatients(response.data);
+                const res = await patientApi.getAll(0, 500);
+                setPatients(res.data);
                 setErrorPatients(null);
-            } catch (err) {
-                if (axios.isAxiosError(err) && err.response) {
-                    if (err.response.status === 401) {
-                        setErrorPatients('Authentication failed. Please log in again.');
-                        window.location.href = '/login'; // Redirect to login
-                    } else {
-                        setErrorPatients(`Failed to fetch patient list: ${err.response.data.detail || err.message}`);
-                    }
-                } else {
-                    setErrorPatients('An unexpected error occurred while fetching the patient list.');
-                }
-                console.error("Error fetching patient list:", err);
+            } catch (err: any) {
+                setErrorPatients(err.response?.data?.detail || 'Không thể tải danh sách bệnh nhân.');
             } finally {
                 setLoadingPatients(false);
             }
@@ -152,12 +131,6 @@ const DashboardPage: React.FC = () => {
         e.preventDefault(); // Prevent page reload
         if (!currentMessage.trim() || !selectedPatient) return;
 
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-            setErrorChat('Authentication token not found. Please log in again.');
-            return;
-        }
-
         const userMessage: ChatMessage = {
             id: Date.now().toString() + '-user', // Simple unique ID
             sender: 'user',
@@ -169,36 +142,15 @@ const DashboardPage: React.FC = () => {
         setErrorChat(null);
 
         try {
-            const response = await axios.post(
-                BACKEND_URL + '/chat/send',
-                {
-                    patient_id: selectedPatient.id,
-                    message: userMessage.text,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                }
-            );
+            const response = await chatApi.sendStaff(selectedPatient.id, userMessage.text);
             const aiMessage: ChatMessage = {
-                id: Date.now().toString() + '-ai', // Simple unique ID
+                id: Date.now().toString() + '-ai',
                 sender: 'ai',
                 text: response.data.reply,
             };
             setChatHistory(prevHistory => [...prevHistory, aiMessage]);
-        } catch (err) {
-            if (axios.isAxiosError(err) && err.response) {
-                 if (err.response.status === 401) {
-                    setErrorChat('Chat authentication failed. Please log in again.');
-                } else {
-                    setErrorChat(`Failed to send message: ${err.response.data.detail || err.message}`);
-                }
-            } else {
-                setErrorChat('An unexpected error occurred while sending the message.');
-            }
-            console.error("Error sending message:", err);
+        } catch (err: any) {
+            setErrorChat(err.response?.data?.detail || 'Không thể gửi tin nhắn.');
         } finally {
             setIsSendingMessage(false);
         }

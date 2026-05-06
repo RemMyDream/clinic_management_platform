@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import styles from './AdminDashboard.module.css';
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import { userApi } from '../../services/api';
 
 interface DashboardStats {
   totalUsers: number;
@@ -28,24 +26,15 @@ const AdminDashboard = () => {
 
   const fetchDashboardStats = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get(`${BACKEND_URL}/users/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
-      const users = response.data;
-      const stats = {
+      const res = await userApi.getAll();
+      const users = res.data;
+      setStats({
         totalUsers: users.length,
-        totalPatients: users.filter((user: any) => user.role === 'PATIENT').length,
-        totalDoctors: users.filter((user: any) => user.role === 'DOCTOR').length,
-        totalStaff: users.filter((user: any) => user.role === 'CLINIC_STAFF').length,
-      };
-      
-      setStats(stats);
-    } catch (err: any) {
-      console.error('Error fetching dashboard stats:', err);
+        totalPatients: users.filter((u: any) => u.role === 'PATIENT').length,
+        totalDoctors: users.filter((u: any) => u.role === 'DOCTOR').length,
+        totalStaff: users.filter((u: any) => u.role === 'CLINIC_STAFF').length,
+      });
+    } catch {
       setError('Không thể tải thống kê dashboard');
     } finally {
       setLoading(false);

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import { UserRole } from '../../types/UserType';
 import styles from './UserManagement.module.css';
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import { userApi } from '../../services/api';
 
 interface User {
   user_id: number;
@@ -65,21 +63,11 @@ const UserManagement: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get(`${BACKEND_URL}/users/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setUsers(response.data);
+      const res = await userApi.getAll();
+      setUsers(res.data);
       setError('');
     } catch (err: any) {
-      console.error('Error fetching users:', err);
-      if (axios.isAxiosError(err) && err.response) {
-        setError(`Không thể tải danh sách người dùng: ${err.response.data.detail || err.message}`);
-      } else {
-        setError('Đã xảy ra lỗi không mong muốn khi tải danh sách người dùng.');
-      }
+      setError(err.response?.data?.detail || 'Không thể tải danh sách người dùng.');
     } finally {
       setLoading(false);
     }
@@ -88,83 +76,38 @@ const UserManagement: React.FC = () => {
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.post(`${BACKEND_URL}/users/`, createForm, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
+      await userApi.create(createForm);
       toast.success('Tạo người dùng thành công!');
       setShowCreateModal(false);
-      setCreateForm({
-        username: '',
-        email: '',
-        full_name: '',
-        password: '',
-        role: 'PATIENT'
-      });
-      fetchUsers(); // Refresh the user list
+      setCreateForm({ username: '', email: '', full_name: '', password: '', role: 'PATIENT' });
+      fetchUsers();
     } catch (err: any) {
-      console.error('Error creating user:', err);
-      if (axios.isAxiosError(err) && err.response) {
-        toast.error(`Tạo người dùng thất bại: ${err.response.data.detail || err.message}`);
-      } else {
-        toast.error('Đã xảy ra lỗi không mong muốn khi tạo người dùng.');
-      }
+      toast.error(err.response?.data?.detail || 'Tạo người dùng thất bại.');
     }
   };
 
   const handleEditUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userToEdit) return;
-    
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.put(`${BACKEND_URL}/users/${userToEdit.user_id}`, editForm, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
+      await userApi.update(userToEdit.user_id, editForm);
       toast.success('Cập nhật người dùng thành công!');
       setShowEditModal(false);
       setUserToEdit(null);
-      fetchUsers(); // Refresh the user list
+      fetchUsers();
     } catch (err: any) {
-      console.error('Error updating user:', err);
-      if (axios.isAxiosError(err) && err.response) {
-        toast.error(`Cập nhật người dùng thất bại: ${err.response.data.detail || err.message}`);
-      } else {
-        toast.error('Đã xảy ra lỗi không mong muốn khi cập nhật người dùng.');
-      }
+      toast.error(err.response?.data?.detail || 'Cập nhật người dùng thất bại.');
     }
   };
 
   const handleDeleteUser = async (userId: number, username: string) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa người dùng "${username}"? Hành động này không thể hoàn tác.`)) {
-      return;
-    }
-    
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa người dùng "${username}"? Hành động này không thể hoàn tác.`)) return;
     try {
-      const token = localStorage.getItem('accessToken');
-      await axios.delete(`${BACKEND_URL}/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
+      await userApi.delete(userId);
       toast.success('Xóa người dùng thành công!');
-      fetchUsers(); // Refresh the user list
+      fetchUsers();
     } catch (err: any) {
-      console.error('Error deleting user:', err);
-      if (axios.isAxiosError(err) && err.response) {
-        toast.error(`Xóa người dùng thất bại: ${err.response.data.detail || err.message}`);
-      } else {
-        toast.error('Đã xảy ra lỗi không mong muốn khi xóa người dùng.');
-      }
+      toast.error(err.response?.data?.detail || 'Xóa người dùng thất bại.');
     }
   };
 

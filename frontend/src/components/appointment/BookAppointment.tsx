@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import './bookAppointment.css'; // Assuming you have a CSS file for styling
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import { appointmentApi, doctorApi } from '../../services/api';
+import './bookAppointment.css';
 
 const BookAppointment: React.FC = () => {
   type FormData = {
@@ -46,56 +44,32 @@ const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [success, setSuccess] = useState('');
   const [filterByDoctor, setFilterByDoctor] = useState(false);
 
-  // Fetch available doctors
   useEffect(() => {
-    const fetchDoctors = async () => {
-      try {
-        const response = await axios.get(`${BACKEND_URL}/doctors`);
-        setDoctors(response.data);
-        console.log("Fetch doctors ok")
-        console.log(response.data)
-      } catch (err) {
-        console.error('Failed to fetch doctors:', err);
-        setError('Không thể lấy danh sách bác sĩ.');
-      }
-    };
-
-    fetchDoctors();
+    doctorApi.getAll()
+      .then((res) => setDoctors(res.data))
+      .catch(() => setError('Không thể lấy danh sách bác sĩ.'));
   }, []);
 
-  // Fetch available slots based on filters
   const fetchAvailableSlots = async () => {
     setLoading(true);
     setError('');
-
     try {
-      const dateFromString = new Date(filters.dateFrom).toISOString().split('T')[0]; // 'YYYY-MM-DD'
-      const dateToString = new Date(filters.dateTo).toISOString().split('T')[0]; // 'YYYY-MM-DD'
-
-      const response = await axios.get(`${BACKEND_URL}/appointments/available-range`, {
-        params: {
-          start_date: dateFromString,
-          end_date: dateToString,
-        },
-      });
-
-      console.log(response.data); // Inspect the response
-
-      const slots: Slot[] = response.data.flatMap((slot: any) => {
+      const dateFromString = new Date(filters.dateFrom).toISOString().split('T')[0];
+      const dateToString = new Date(filters.dateTo).toISOString().split('T')[0];
+      const response = await appointmentApi.getAvailableRange(dateFromString, dateToString);
+      const mapped: Slot[] = response.data.flatMap((slot: any) => {
         const [date, time] = slot.datetime.split('T');
         return slot.available_doctors.map((doctor: any) => ({
-          id: `${slot.datetime}_${doctor.doctor_id}`, // Unique ID per doctor per slot
+          id: `${slot.datetime}_${doctor.doctor_id}`,
           date,
-          time: time.slice(0, 5), // 'HH:mm'
+          time: time.slice(0, 5),
           doctorName: doctor.doctor_name,
           doctorId: doctor.doctor_id,
         }));
       });
-
-      setSlots(slots);
+      setSlots(mapped);
       setStep(2);
-    } catch (error) {
-      console.error('Error fetching available slots:', error);
+    } catch {
       setError('Không thể lấy lịch trống.');
     } finally {
       setLoading(false);
@@ -108,33 +82,23 @@ const [doctors, setDoctors] = useState<Doctor[]>([]);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle appointment booking
   const handleSubmit = async () => {
     setLoading(true);
     setError('');
     setSuccess('');
     try {
-      const token = localStorage.getItem("accessToken")
-      const userIdStr = localStorage.getItem('user_id')
-      const user_id = userIdStr ? Number(userIdStr) : null;  // convert string to number or null if not found
-      const payload = {
+      const user_id = Number(localStorage.getItem('user_id')) || null;
+      await appointmentApi.book({
         patient_id: user_id,
         appointment_day: formData.date,
         appointment_time: formData.time,
         doctor_id: formData.doctorId,
         reason: formData.reason,
-      };
-      console.log('Booking payload:', payload);
-      const response = await axios.post(`${BACKEND_URL}/appointments/book`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
       setSuccess('Đặt lịch khám thành công!');
-      setFormData({ date: '', time: '', doctorId: null, reason: '' }); //reset
+      setFormData({ date: '', time: '', doctorId: null, reason: '' });
       setStep(4);
-    } catch (err) {
-      console.error('Failed to book appointment:', err);
+    } catch {
       setError('Không thể đặt lịch khám. Vui lòng thử lại.');
     } finally {
       setLoading(false);
@@ -150,6 +114,7 @@ const [doctors, setDoctors] = useState<Doctor[]>([]);
         reason: formData.reason, // keep existing reason
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSlot]);
 
   return (

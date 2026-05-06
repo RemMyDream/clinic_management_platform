@@ -41,8 +41,5 @@ def get_db():
         db.close()
 
 def create_db_and_tables():
-    # This function ensures that all tables defined in your models are created in the database
-    # if they do not already exist. It does not modify existing tables or drop them.
-    # For schema changes (like adding new columns to existing tables) after the initial creation,
-    # you will need to use a database migration tool like Alembic or apply manual SQL ALTER TABLE commands.
+    from . import models  # noqa: F401 — import to register all models with Base.metadata
     Base.metadata.create_all(bind=engine, checkfirst=True)

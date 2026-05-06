@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import styles from './Profile.module.css'; // Import CSS module
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import styles from './Profile.module.css';
+import { userApi } from '../services/api';
 
 // Define all possible fields for user profile
 interface UserProfileForm {
@@ -46,25 +44,10 @@ const Profile: React.FC = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const token = localStorage.getItem('accessToken');
-                const response = await axios.get(`${BACKEND_URL}/users/me`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                setUserData(response.data);
-                console.log("User data fetched successfully:", response.data);
-            } catch (err) {
-                if (axios.isAxiosError(err) && err.response) {
-                    if (err.response.status === 401) {
-                        setError('Authentication failed.');
-                    } else {
-                        setError(`Failed to fetch user data: ${err.response.data.detail || err.message}`);
-                    }
-                } else {
-                    setError('An unexpected error occurred while fetching the user data.');
-                }
-                console.error("Error fetching user data:", err);
+                const res = await userApi.getMe();
+                setUserData(res.data);
+            } catch (err: any) {
+                setError(err.response?.data?.detail || 'Không thể tải dữ liệu người dùng.');
             } finally {
                 setLoading(false);
             }
@@ -76,8 +59,6 @@ const Profile: React.FC = () => {
     useEffect(() => {
         setFormData({ ...userData });
     }, [userData]);
-
-    const displayValue = (value: string) => value && value.trim() !== '' ? value : '—';
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -100,24 +81,17 @@ const Profile: React.FC = () => {
         setLoading(true);
         setError('');
         try {
-            const token = localStorage.getItem('accessToken');
-            // Prepare payload: merge phone and phone_number, remove empty fields
             const payload: { [key: string]: any } = { ...formData };
             if (payload.phone && !payload.phone_number) payload.phone_number = payload.phone;
             delete payload.phone;
             if (!payload.password) delete payload.password;
             Object.keys(payload).forEach((k) => { if (payload[k] === '' || payload[k] === undefined) delete payload[k]; });
-            await axios.put(`${BACKEND_URL}/users/me`, payload, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            await userApi.updateMe(payload);
             setUserData((prev) => ({ ...prev, ...payload }));
             toast.success('Cập nhật hồ sơ thành công!');
             setEditMode(false);
-        } catch (err) {
-            let msg = 'An unexpected error occurred while updating the profile.';
-            if (axios.isAxiosError(err) && err.response) {
-                msg = err.response.data.detail || err.message;
-            }
+        } catch (err: any) {
+            const msg = err.response?.data?.detail || 'Không thể cập nhật hồ sơ.';
             setError(msg);
             toast.error(msg);
         } finally {

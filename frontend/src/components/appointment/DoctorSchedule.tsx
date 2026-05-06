@@ -4,11 +4,9 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { Badge, CircularProgress, Box, Modal } from '@mui/material';
 import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
-import dayjs, { Dayjs } from 'dayjs';
-import axios from 'axios';
+import dayjs from 'dayjs';
 import styles from './DoctorSchedule.module.css';
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import { appointmentApi, patientApi } from '../../services/api';
 
 type Appointment = {
   patient_id: number;
@@ -28,54 +26,31 @@ const DoctorSchedule = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const availableTimes = ['08:30', '09:30', '10:30', '13:30', '14:30', '15:30', '16:30']; // Predefined times
-
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const token = localStorage.getItem('accessToken');
-        const response = await axios.get(`${BACKEND_URL}/appointments`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
+        const res = await appointmentApi.getMyAppointments();
         const today = new Date().toISOString().split('T')[0];
-        const upcomingAppointments = response.data.filter(
-          (appointment: Appointment) => appointment.appointment_day >= today
-        );
+        const upcoming = res.data.filter((a: Appointment) => a.appointment_day >= today);
 
-        const appointmentsWithPatientNames = await Promise.all(
-          upcomingAppointments.map(async (appointment: Appointment) => {
+        const enriched = await Promise.all(
+          upcoming.map(async (a: Appointment) => {
             try {
-              const patientResponse = await axios.get(`${BACKEND_URL}/patients/${appointment.patient_id}`, {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              });
-              return {
-                ...appointment,
-                patientName: patientResponse.data.full_name, // Add patientName to the appointment
-              };
-            } catch (err) {
-              console.error(`Failed to fetch patient name for patient_id ${appointment.patient_id}:`, err);
-              return {
-                ...appointment,
-                patientName: 'Bệnh nhân không xác định', // Fallback if patient name cannot be fetched
-              };
+              const p = await patientApi.getById(a.patient_id);
+              return { ...a, patientName: p.data.full_name };
+            } catch {
+              return { ...a, patientName: 'Bệnh nhân không xác định' };
             }
           })
         );
 
-        appointmentsWithPatientNames.sort((a, b) => {
-          const dateA = new Date(`${a.appointment_day}T${a.appointment_time}`);
-          const dateB = new Date(`${b.appointment_day}T${b.appointment_time}`);
-          return dateA.getTime() - dateB.getTime();
-        });
+        enriched.sort((a: Appointment, b: Appointment) =>
+          new Date(`${a.appointment_day}T${a.appointment_time}`).getTime() -
+          new Date(`${b.appointment_day}T${b.appointment_time}`).getTime()
+        );
 
-        setAppointments(appointmentsWithPatientNames);
-      } catch (err) {
-        console.error('Failed to fetch appointments:', err);
+        setAppointments(enriched);
+      } catch {
         setError('Không thể tải danh sách lịch hẹn.');
       } finally {
         setLoading(false);

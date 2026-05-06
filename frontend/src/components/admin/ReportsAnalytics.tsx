@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import styles from './ReportsAnalytics.module.css';
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import { userApi, appointmentApi, patientApi } from '../../services/api';
 
 interface ReportData {
   totalUsers: number;
@@ -49,29 +47,19 @@ const ReportsAnalytics: React.FC = () => {
 
   useEffect(() => {
     fetchReportData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
   const fetchReportData = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      
-      // Fetch users data
-      const usersResponse = await axios.get(`${BACKEND_URL}/users/`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const users = usersResponse.data;
-
-      // Fetch appointments data
-      const appointmentsResponse = await axios.get(`${BACKEND_URL}/appointments/`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const appointments = appointmentsResponse.data;
-
-      // Fetch patients data
-      const patientsResponse = await axios.get(`${BACKEND_URL}/patients/`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const patients = patientsResponse.data;
+      const [usersRes, appointmentsRes, patientsRes] = await Promise.all([
+        userApi.getAll(),
+        appointmentApi.getAll(0, 1000),
+        patientApi.getAll(0, 500),
+      ]);
+      const users = usersRes.data;
+      const appointments = appointmentsRes.data;
+      const _patients = patientsRes.data;
 
       // Calculate statistics
       const today = new Date().toISOString().split('T')[0];

@@ -369,6 +369,17 @@
   text-align: center;
 }
 
+.statusCanceled {
+  background: #ef4444;
+  color: var(--white);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  text-align: center;
+}
+
 .emptyState {
   background: var(--white);
   border-radius: var(--radius-lg);

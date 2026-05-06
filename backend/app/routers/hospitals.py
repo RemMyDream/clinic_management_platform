@@ -1,40 +1,47 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app import crud, schemas, models
-from app.database import get_db
-from app.dependencies import get_current_active_admin
 from typing import List
+
+from ..database import get_db
+from ..schemas import HospitalSchema, HospitalCreate, HospitalUpdate
+from ..repositories import HospitalRepository
+from ..dependencies import get_current_active_admin
 
 router = APIRouter(
     tags=["Hospitals"],
     responses={404: {"description": "Not found"}},
 )
 
-@router.post("/", response_model=schemas.HospitalSchema)
-def create_hospital(hospital: schemas.HospitalCreate, db: Session = Depends(get_db)):
-    return crud.create_hospital(db=db, hospital_in=hospital)
 
-@router.get("/", response_model=List[schemas.HospitalSchema])
+@router.post("/", response_model=HospitalSchema)
+def create_hospital(hospital: HospitalCreate, db: Session = Depends(get_db)):
+    return HospitalRepository.create(db, hospital)
+
+
+@router.get("/", response_model=List[HospitalSchema])
 def read_hospitals(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return crud.get_hospitals(db=db, skip=skip, limit=limit)
+    return HospitalRepository.get_all(db, skip, limit)
 
-@router.get("/{hospital_id}", response_model=schemas.HospitalSchema)
+
+@router.get("/{hospital_id}", response_model=HospitalSchema)
 def read_hospital(hospital_id: int, db: Session = Depends(get_db)):
-    db_hospital = crud.get_hospital(db, hospital_id=hospital_id)
-    if db_hospital is None:
+    hospital = HospitalRepository.get_by_id(db, hospital_id)
+    if not hospital:
         raise HTTPException(status_code=404, detail="Hospital not found")
-    return db_hospital
+    return hospital
 
-@router.put("/{hospital_id}", response_model=schemas.HospitalSchema, dependencies=[Depends(get_current_active_admin)])
-def update_hospital(hospital_id: int, hospital_update: schemas.HospitalUpdate, db: Session = Depends(get_db)):
-    updated = crud.update_hospital(db=db, hospital_id=hospital_id, hospital_update=hospital_update)
-    if updated is None:
+
+@router.put("/{hospital_id}", response_model=HospitalSchema, dependencies=[Depends(get_current_active_admin)])
+def update_hospital(hospital_id: int, hospital_update: HospitalUpdate, db: Session = Depends(get_db)):
+    updated = HospitalRepository.update(db, hospital_id, hospital_update)
+    if not updated:
         raise HTTPException(status_code=404, detail="Hospital not found")
     return updated
 
-@router.delete("/{hospital_id}", response_model=schemas.HospitalSchema, dependencies=[Depends(get_current_active_admin)])
+
+@router.delete("/{hospital_id}", response_model=HospitalSchema, dependencies=[Depends(get_current_active_admin)])
 def delete_hospital(hospital_id: int, db: Session = Depends(get_db)):
-    deleted = crud.delete_hospital(db=db, hospital_id=hospital_id)
-    if deleted is None:
+    deleted = HospitalRepository.delete(db, hospital_id)
+    if not deleted:
         raise HTTPException(status_code=404, detail="Hospital not found")
     return deleted

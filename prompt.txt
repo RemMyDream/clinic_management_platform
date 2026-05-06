@@ -1,0 +1,138 @@
+.venv) (base) PS C:\Users\Chien\Documents\Study\2025\clinic-management\frontend> npm start
+
+> frontend@0.1.0 start
+> react-scripts start
+
+(node:43964) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Browserslist: browsers data (caniuse-lite) is 12 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+(node:43964) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(node:43964) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+Starting the development server...
+Compiled with warnings.
+
+[eslint] 
+src\components\ForgotPasswordPage.tsx
+  Line 4:10:  'toast' is defined but never used  @typescript-eslint/no-unused-vars
+
+src\components\admin\ReportsAnalytics.tsx
+  Line 50:6:   React Hook useEffect has a missing dependency: 'fetchReportData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 61:13:  'patients' is assigned a value but never used                                                                       @typescript-eslint/no-unused-vars
+
+src\components\admin\ScheduleSettings.tsx
+  Line 61:6:  React Hook useEffect has a missing dependency: 'initializeWeeklySchedule'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\admin\SystemLogs.tsx
+  Line 30:6:    React Hook useEffect has a missing dependency: 'fetchSystemLogs'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 34:6:    React Hook useEffect has a missing dependency: 'applyFilters'. Either include it or remove the dependency array     react-hooks/exhaustive-deps
+  Line 38:13:   'token' is assigned a value but never used                                                                          @typescript-eslint/no-unused-vars
+  Line 164:15:  'token' is assigned a value but never used                                                                          @typescript-eslint/no-unused-vars
+
+src\components\appointment\BookAppointment.tsx
+  Line 117:6:  React Hook useEffect has a missing dependency: 'formData.reason'. Either include it or remove the dependency array. You can also replace multiple useState variables with useReducer if 'setFormData' needs the current value of 'formData.reason'  react-hooks/exhaustive-deps
+
+src\components\appointment\DoctorSchedule.tsx
+  Line 7:17:  'Dayjs' is defined but never used                    @typescript-eslint/no-unused-vars
+  Line 29:9:  'availableTimes' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src\components\appointment\ViewAppointment.tsx
+  Line 44:10:  'error' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  Line 52:9:   'userRole' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src\components\dashboards\PatientDashboard.tsx
+  Line 38:13:  'now' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src\components\medical\MedicalHistory.tsx
+  Line 59:6:  React Hook useEffect has a missing dependency: 'applyFilters'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\medical\MedicalReportsManagement.tsx
+  Line 72:6:  React Hook useEffect has a missing dependency: 'applyFilters'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\medical\Prescriptions.tsx
+  Line 20:10:  'doctors' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src\pages\Profile.tsx
+  Line 63:11:  'displayValue' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src\components\ForgotPasswordPage.tsx
+  Line 4:10:  'toast' is defined but never used  @typescript-eslint/no-unused-vars
+
+src\components\admin\ReportsAnalytics.tsx
+  Line 50:6:   React Hook useEffect has a missing dependency: 'fetchReportData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 61:13:  'patients' is assigned a value but never used                                                                       @typescript-eslint/no-unused-vars
+
+src\components\admin\ScheduleSettings.tsx
+  Line 61:6:  React Hook useEffect has a missing dependency: 'initializeWeeklySchedule'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\admin\SystemLogs.tsx
+  Line 30:6:    React Hook useEffect has a missing dependency: 'fetchSystemLogs'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 34:6:    React Hook useEffect has a missing dependency: 'applyFilters'. Either include it or remove the dependency array     react-hooks/exhaustive-deps
+  Line 38:13:   'token' is assigned a value but never used                                                                          @typescript-eslint/no-unused-vars
+  Line 164:15:  'token' is assigned a value but never used                                                                          @typescript-eslint/no-unused-vars
+
+src\components\appointment\BookAppointment.tsx
+  Line 117:6:  React Hook useEffect has a missing dependency: 'formData.reason'. Either include it or remove the dependency array. You can also replace multiple useState variables with useReducer if 'setFormData' needs the current value of 'formData.reason'  react-hooks/exhaustive-deps
+
+src\components\appointment\DoctorSchedule.tsx
+  Line 7:17:  'Dayjs' is defined but never used                    @typescript-eslint/no-unused-vars
+  Line 29:9:  'availableTimes' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src\components\appointment\ViewAppointment.tsx
+  Line 44:10:  'error' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  Line 52:9:   'userRole' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src\components\dashboards\PatientDashboard.tsx
+  Line 38:13:  'now' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src\components\medical\MedicalHistory.tsx
+  Line 59:6:  React Hook useEffect has a missing dependency: 'applyFilters'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\medical\MedicalReportsManagement.tsx
+  Line 72:6:  React Hook useEffect has a missing dependency: 'applyFilters'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\medical\Prescriptions.tsx
+  Line 20:10:  'doctors' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+src\pages\Profile.tsx
+  Line 63:11:  'displayValue' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+webpack compiled with 1 warning
+ERROR in src/components/Chatbot/ChatbotWidget.tsx:131:17
+TS2304: Cannot find name 'axios'.
+    129 |             let errorMessage = 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.';
+    130 |             
+  > 131 |             if (axios.isAxiosError(err) && err.response) {
+        |                 ^^^^^
+    132 |                 errorMessage = err.response.data.detail || errorMessage;
+    133 |             }
+    134 |             
+
+ERROR in src/components/Chatbot/ChatbotWidget.tsx:131:44
+TS18046: 'err' is of type 'unknown'.
+    129 |             let errorMessage = 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.';
+    130 |             
+  > 131 |             if (axios.isAxiosError(err) && err.response) {
+        |                                            ^^^
+    132 |                 errorMessage = err.response.data.detail || errorMessage;
+    133 |             }
+    134 |             
+
+ERROR in src/components/Chatbot/ChatbotWidget.tsx:132:32
+TS18046: 'err' is of type 'unknown'.
+    130 |             
+    131 |             if (axios.isAxiosError(err) && err.response) {
+  > 132 |                 errorMessage = err.response.data.detail || errorMessage;
+        |                                ^^^
+    133 |             }
+    134 |             
+    135 |             setError(errorMessage);
+
+
+
+FIX THESE BUG IN FE

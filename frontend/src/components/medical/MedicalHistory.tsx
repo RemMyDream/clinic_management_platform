@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import styles from './MedicalHistory.module.css';
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import { medicalReportApi } from '../../services/api';
 
 type MedicalReport = {
   record_id: number;
@@ -58,20 +56,14 @@ const MedicalHistory = () => {
 
   useEffect(() => {
     applyFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [medicalReports, searchFilters]);
 
   const fetchMedicalHistory = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get(`${BACKEND_URL}/medical_reports/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setMedicalReports(response.data);
-    } catch (err) {
-      console.error('Failed to fetch medical history:', err);
+      const res = await medicalReportApi.getAll();
+      setMedicalReports(res.data);
+    } catch {
       setError('Không thể tải lịch sử bệnh án.');
     } finally {
       setLoading(false);

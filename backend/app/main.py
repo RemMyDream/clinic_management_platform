@@ -1,50 +1,88 @@
-from fastapi import FastAPI, Depends, HTTPException, status # Add status and HTTPException
-from fastapi.middleware.cors import CORSMiddleware # Add this import
+import time
+import logging
 from contextlib import asynccontextmanager
-from sqlalchemy.orm import Session # Add Session
 
-from .database import engine, create_db_and_tables, get_db # Import create_db_and_tables and get_db
-from .routers import auth, users, chat, patients, appointments, doctors, hospitals, password, reports
+from fastapi import FastAPI, Request, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from .database import create_db_and_tables
+from .routers import (
+    auth, users, chat, patients, appointments,
+    doctors, hospitals, password, reports,
+    staff, prescriptions, otc_medications,
+)
+
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup logic
     create_db_and_tables()
     yield
-    # Optional: Add any shutdown logic here
+
 
 app = FastAPI(
     title="Clinic Management API",
     description="API for Clinic Management, a healthcare access platform for rural communities.",
-    version="0.1.0",
-    lifespan=lifespan
+    version="0.7.0",
+    lifespan=lifespan,
 )
 
-# CORS Middleware configuration
-origins = ["*"]
-
+# ── CORS ──────────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=False,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
-app.include_router(users.router, prefix="/users", tags=["Users"]) # Assuming a users router exists
-app.include_router(chat.router, prefix="/chat", tags=["Chat"]) # Assuming a chat router exists
-app.include_router(patients.router, prefix="/patients", tags=["Patients"]) # Include the patients router
-app.include_router(appointments.router, prefix="/appointments", tags=["Appointments"]) # Include the appointments router
-app.include_router(doctors.router, prefix="/doctors", tags=["Doctors"])
-app.include_router(hospitals.router, prefix="/hospitals", tags=["Hospitals"])
-app.include_router(password.router, prefix="/password", tags=["Password"])
-app.include_router(reports.router, prefix="/medical_reports", tags=["Medical Reports"]) # Include the reports router
+
+# ── Request logging middleware ─────────────────────────────────────────
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start = time.time()
+    response = await call_next(request)
+    duration = round((time.time() - start) * 1000, 1)
+    logger.info(
+        "%s %s → %s (%sms)",
+        request.method,
+        request.url.path,
+        response.status_code,
+        duration,
+    )
+    return response
+
+
+# ── Global error handler ───────────────────────────────────────────────
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.exception("Unhandled error on %s %s", request.method, request.url.path)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": "An unexpected error occurred. Please try again later."},
+    )
+
+
+# ── Routers ───────────────────────────────────────────────────────────
+app.include_router(auth.router,            prefix="/auth",            tags=["Authentication"])
+app.include_router(users.router,           prefix="/users",           tags=["Users"])
+app.include_router(patients.router,        prefix="/patients",        tags=["Patients"])
+app.include_router(doctors.router,         prefix="/doctors",         tags=["Doctors"])
+app.include_router(staff.router,           prefix="/staff",           tags=["Staff"])
+app.include_router(hospitals.router,       prefix="/hospitals",       tags=["Hospitals"])
+app.include_router(appointments.router,    prefix="/appointments",    tags=["Appointments"])
+app.include_router(reports.router,         prefix="/medical_reports", tags=["Medical Reports"])
+app.include_router(prescriptions.router,   prefix="/prescriptions",   tags=["Prescriptions"])
+app.include_router(otc_medications.router, prefix="/otc_medications", tags=["OTC Medications"])
+app.include_router(chat.router,            prefix="/chat",            tags=["Chat"])
+app.include_router(password.router,        prefix="/password",        tags=["Password"])
 
 
 @app.get("/", tags=["Root"])
 async def read_root():
     return {
         "message": "Welcome to Clinic Management API",
-        "version": "v0.6.0"
+        "version": "v0.7.0",
     }

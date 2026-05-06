@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { userApi } from '../../services/api';
 import { toast } from 'react-toastify';
 import styles from './ScheduleSettings.module.css';
 
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
 
 interface TimeSlot {
   id: string;
@@ -59,15 +58,12 @@ const ScheduleSettings: React.FC = () => {
     fetchDoctors();
     loadClinicSettings();
     initializeWeeklySchedule();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchDoctors = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get(`${BACKEND_URL}/users/`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
+      const response = await userApi.getAll();
       const doctorUsers = response.data.filter((user: any) => user.role === 'DOCTOR');
       setDoctors(doctorUsers);
       
@@ -175,16 +171,6 @@ const ScheduleSettings: React.FC = () => {
       // For now, we'll save to localStorage
       localStorage.setItem('clinicSettings', JSON.stringify(clinicSettings));
       localStorage.setItem('weeklySchedule', JSON.stringify(weeklySchedule));
-      
-      // If we have backend endpoints, we would save there:
-      // const token = localStorage.getItem('accessToken');
-      // await axios.post(`${BACKEND_URL}/admin/schedule-settings`, {
-      //   doctorId: selectedDoctor,
-      //   weeklySchedule,
-      //   clinicSettings
-      // }, {
-      //   headers: { Authorization: `Bearer ${token}` }
-      // });
       
       toast.success('Cài đặt đã được lưu thành công!');
     } catch (err: any) {

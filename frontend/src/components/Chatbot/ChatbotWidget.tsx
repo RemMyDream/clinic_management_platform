@@ -3,8 +3,7 @@ import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import { UserRole } from '../../types/UserType';
 import './ChatbotWidget.css';
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import { chatApi } from '../../services/api';
 
 interface ChatMessage {
     id: string;
@@ -114,27 +113,9 @@ Tôi có thể giúp bạn với các thông tin cơ bản về phòng khám và
         setError(null);
 
         try {
-            let endpoint = '/chat/public';
-            let headers: any = { 'Content-Type': 'application/json' };
-
-            // Determine endpoint and headers based on authentication and role
-            if (isAuthenticated) {
-                const token = localStorage.getItem('accessToken');
-                if (token) {
-                    headers.Authorization = `Bearer ${token}`;
-                    
-                    if (userRole === 'PATIENT') {
-                        endpoint = '/chat/patient';
-                    }
-                    // For staff roles, we could use a different endpoint or the existing one
-                }
-            }
-
-            const response = await axios.post(
-                BACKEND_URL + endpoint,
-                { message: currentMessage },
-                { headers }
-            );
+            const response = isAuthenticated && userRole === 'PATIENT'
+                ? await chatApi.sendPatient(currentMessage)
+                : await chatApi.sendPublic(currentMessage);
 
             const aiMessage: ChatMessage = {
                 id: Date.now().toString() + '-ai',

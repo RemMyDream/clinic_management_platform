@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import './scheduleAppointment.css';
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import { appointmentApi, patientApi, doctorApi } from '../../services/api';
 
 type Patient = {
   patient_id: number;
@@ -50,22 +48,14 @@ const ScheduleAppointment: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem('accessToken');
-        
-        // Fetch patients
-        const patientsResponse = await axios.get(`${BACKEND_URL}/patients`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setPatients(patientsResponse.data);
-        setFilteredPatients(patientsResponse.data);
-
-        // Fetch doctors
-        const doctorsResponse = await axios.get(`${BACKEND_URL}/doctors`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setDoctors(doctorsResponse.data);
-      } catch (err) {
-        console.error('Failed to fetch initial data:', err);
+        const [patientsRes, doctorsRes] = await Promise.all([
+          patientApi.getAll(0, 500),
+          doctorApi.getAll(),
+        ]);
+        setPatients(patientsRes.data);
+        setFilteredPatients(patientsRes.data);
+        setDoctors(doctorsRes.data);
+      } catch {
         setError('Không thể tải danh sách bệnh nhân và bác sĩ.');
       }
     };
@@ -98,9 +88,7 @@ const ScheduleAppointment: React.FC = () => {
     setError('');
 
     try {
-      const response = await axios.get(`${BACKEND_URL}/appointments/available`, {
-        params: { day: formData.date },
-      });
+      const response = await appointmentApi.getAvailableSlots(formData.date);
 
       let slots = response.data;
 
@@ -154,17 +142,12 @@ const ScheduleAppointment: React.FC = () => {
     setSuccess('');
 
     try {
-      const token = localStorage.getItem('accessToken');
-      const payload = {
+      await appointmentApi.book({
         patient_id: formData.patientId,
         doctor_id: formData.doctorId,
         appointment_day: formData.date,
         appointment_time: formData.time,
         reason: formData.reason,
-      };
-
-      await axios.post(`${BACKEND_URL}/appointments/book`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
       });
 
       setSuccess('Sắp xếp lịch hẹn thành công!');

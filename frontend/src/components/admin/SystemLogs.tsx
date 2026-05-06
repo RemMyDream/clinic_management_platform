@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import styles from './SystemLogs.module.css';
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
 
 interface LogEntry {
   id: string;
@@ -30,15 +27,16 @@ const SystemLogs: React.FC = () => {
 
   useEffect(() => {
     fetchSystemLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     applyFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logs, levelFilter, categoryFilter, searchTerm, dateFilter]);
 
   const fetchSystemLogs = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
       
       // Since there might not be a logs endpoint, we'll simulate logs based on user activities
       // In a real system, this would fetch from an actual logging service
@@ -164,9 +162,6 @@ const SystemLogs: React.FC = () => {
   const clearLogs = async () => {
     if (window.confirm('Bạn có chắc chắn muốn xóa tất cả nhật ký không? Hành động này không thể hoàn tác.')) {
       try {
-        const token = localStorage.getItem('accessToken');
-        // In a real system, this would make an API call to clear logs
-        
         setLogs([]);
         setFilteredLogs([]);
         toast.success('Nhật ký đã được xóa thành công');
