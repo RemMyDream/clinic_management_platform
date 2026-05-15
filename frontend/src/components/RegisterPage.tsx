@@ -2,22 +2,9 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import api from '../services/api';
 
-import styles from './RegisterPage.module.css'; // Assuming you have a CSS file for styles
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
-
-// Placeholder translation function
-const t = (key: string, params?: object) => {
-    if (params) {
-        let message = key;
-        for (const [paramKey, value] of Object.entries(params)) {
-            message = message.replace(`{{${paramKey}}}`, String(value));
-        }
-        return message;
-    }
-    return key;
-};
+import styles from './RegisterPage.module.css';
 
 const RegisterPage: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -34,25 +21,15 @@ const RegisterPage: React.FC = () => {
         setLoading(true);
 
         try {
-            const formData = new URLSearchParams();
-            formData.append('username', username);
-            formData.append('password', password);
-            formData.append('mail', mail);
-            formData.append('fullname', fullname);
-
-            const response = await axios.post(BACKEND_URL + '/auth/register/', {
+            const response = await api.post('/auth/register', {
                 username,
                 email: mail,
                 password,
                 full_name: fullname,
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                }
             });
 
             if (response.status === 201 || response.status === 200) {
-                toast.success(t('Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.'));
+                toast.success('Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.');
                 setTimeout(() => {
                     navigate('/login');
                 }, 1000);

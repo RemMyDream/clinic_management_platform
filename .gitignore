@@ -30,3 +30,7 @@ env/
 
 # Log files
 *.log
+
+prompt.txt
+.claude
+skill.md

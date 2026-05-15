@@ -17,20 +17,18 @@ async def login_for_access_token(
     return AuthService.login(db, email=form_data.username, password=form_data.password)
 
 
-@router.post("/register/", response_model=UserSchema, tags=["authentication"])
+@router.post("/register", response_model=UserSchema, tags=["authentication"])
 async def register_user(request: Request, db: Session = Depends(get_db)):
     body = await request.json()
     if not body:
         from fastapi import HTTPException
         raise HTTPException(status_code=400, detail="Do not receive user data")
 
-    role = body.get("role") or UserRole.PATIENT
-
     user_data = UserCreate(
         username=body["username"],
         email=body["email"],
         full_name=body["full_name"],
         password=body["password"],
-        role=role,
+        role=UserRole.PATIENT,
     )
     return AuthService.register(db, user_data)

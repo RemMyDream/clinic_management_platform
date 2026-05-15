@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { prescriptionApi, doctorApi } from '../../services/api';
+import { prescriptionApi } from '../../services/api';
 import styles from './Prescriptions.module.css';
 
 interface Prescription {
@@ -10,14 +10,9 @@ interface Prescription {
   quantity: number;
 }
 
-interface Doctor {
-  doctor_id: number;
-  doctor_name: string;
-}
 
 const Prescriptions: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
-  const [_doctors, setDoctors] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Prescription | null>(null);
@@ -35,18 +30,8 @@ const Prescriptions: React.FC = () => {
         return;
       }
 
-      const [prescRes, docRes] = await Promise.all([
-        prescriptionApi.getByPatient(patientId),
-        doctorApi.getAll(),
-      ]);
-
-      const doctorMap: Record<number, string> = {};
-      (docRes.data as Doctor[]).forEach((d) => {
-        doctorMap[d.doctor_id] = d.doctor_name;
-      });
-
+      const prescRes = await prescriptionApi.getByPatient(patientId);
       setPrescriptions(prescRes.data);
-      setDoctors(doctorMap);
       if (prescRes.data.length > 0) setSelected(prescRes.data[0]);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Không thể tải đơn thuốc.');

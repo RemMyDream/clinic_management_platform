@@ -3,20 +3,7 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import styles from './LoginPage.module.css';
 import { toast } from 'react-toastify';
-
-// Placeholder translation function
-const t = (key: string, params?: object) => {
-    if (params) {
-        let message = key;
-        for (const [paramKey, value] of Object.entries(params)) {
-            message = message.replace(`{{${paramKey}}}`, String(value));
-        }
-        return message;
-    }
-    return key;
-};
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import api from '../services/api';
 
 const LoginPage: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -35,7 +22,7 @@ const LoginPage: React.FC = () => {
             formData.append('username', username);
             formData.append('password', password);
 
-            const response = await axios.post(BACKEND_URL + '/auth/token', formData, {
+            const response = await api.post('/auth/token', formData, {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
@@ -45,7 +32,7 @@ const LoginPage: React.FC = () => {
                 localStorage.setItem('accessToken', response.data.access_token);
                 localStorage.setItem('role', response.data.role); // Store the role in localStorage
                 localStorage.setItem('user_id', response.data.user_id)
-                toast.success(t('Đăng nhập thành công!'));
+                toast.success('Đăng nhập thành công!');
                 navigate('/dashboard');
             }
         } catch (err: any) {
@@ -53,7 +40,7 @@ const LoginPage: React.FC = () => {
                 const status = err.response.status;
                 if (status === 401 || status === 403) {
                     setError('Email hoặc mật khẩu không đúng, hoặc vai trò không được phép.');
-                    toast.error(t('Đăng nhập thất bại, vui lòng kiểm tra lại thông tin đăng nhập.'));
+                    toast.error('Đăng nhập thất bại, vui lòng kiểm tra lại thông tin đăng nhập.');
                 } else {
                     setError(`Đăng nhập thất bại: ${err.response.data.detail || 'Lỗi máy chủ'}`);
                 }

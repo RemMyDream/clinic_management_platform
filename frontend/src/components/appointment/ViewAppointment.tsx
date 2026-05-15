@@ -41,7 +41,7 @@ const availableTimes = ['08:30', '09:30', '10:30', '13:30', '14:30', '15:30', '1
 const ViewAppointment = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [_error, setError] = useState('');
+  const [error, setError] = useState('');
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [selected, setSelected] = useState<Appointment | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -129,6 +129,8 @@ const ViewAppointment = () => {
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
       <div className="appointments-container">
         <h1 className="appointments-header">Lịch hẹn của tôi</h1>
+
+        {error && <p className="error-message">{error}</p>}
 
         {loading ? (
           <div className="loading-spinner">

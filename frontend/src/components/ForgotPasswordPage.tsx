@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import styles from './ForgotPasswordPage.module.css';
-
-const BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').replace(/\/+$/, '');
+import api from '../services/api';
 
 const ForgotPasswordPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -18,7 +17,7 @@ const ForgotPasswordPage: React.FC = () => {
         setLoading(true);
 
         try {
-            const response = await axios.post(BACKEND_URL + '/password/forgot-password/', { email });
+            const response = await api.post('/password/forgot-password', { email });
             setMessage(response.data.message);
         } catch (err: any) {
             if (axios.isAxiosError(err) && err.response) {

@@ -46,7 +46,7 @@ const PatientDashboard = () => {
       const upcoming = allAppts.filter((a) => {
         const d = new Date(a.appointment_day);
         const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-        return d > todayStart;
+        return d >= todayStart && a.status === 'Scheduled';
       }).length;
 
       const completed = allAppts.filter((a) => a.status === 'Completed').length;

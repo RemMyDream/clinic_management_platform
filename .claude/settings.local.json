@@ -15,7 +15,12 @@
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Chien\\\\Documents\\\\Study\\\\2025\\\\clinic-management\" -Recurse -Force | Where-Object {$_.Name -match 'docker-compose|\\\\.env'})",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Chien\\\\Documents\\\\Study\\\\2025\\\\clinic-management\" -Force | Where-Object {$_.Name -notlike 'node_modules' -and $_.Name -notlike '.git'} | ForEach-Object {if \\($_.PSIsContainer\\) {\"DIR  $_\"} else {\"FILE $_\"}})",
       "PowerShell(docker --version)",
-      "PowerShell(docker compose config *)"
+      "PowerShell(docker compose config *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Chien\\\\Documents\\\\Study\\\\2025\\\\clinic-management\" -Recurse -Directory)",
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Chien\\\\Documents\\\\Study\\\\2025\\\\clinic-management\\\\backend\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(npx tsc *)"
     ]
   }
 }

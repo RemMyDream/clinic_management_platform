@@ -76,9 +76,9 @@ const ReportsAnalytics: React.FC = () => {
         weeklyAppointments: appointments.filter((apt: any) => apt.appointment_day >= oneWeekAgo).length,
         monthlyAppointments: appointments.filter((apt: any) => apt.appointment_day >= oneMonthAgo).length,
         appointmentStatusBreakdown: {
-          pending: appointments.filter((apt: any) => new Date(`${apt.appointment_day}T${apt.appointment_time}`) > new Date()).length,
-          completed: appointments.filter((apt: any) => new Date(`${apt.appointment_day}T${apt.appointment_time}`) < new Date()).length,
-          cancelled: 0 // Placeholder - would need status field in appointments
+          pending: appointments.filter((apt: any) => apt.status === 'Scheduled').length,
+          completed: appointments.filter((apt: any) => apt.status === 'Completed').length,
+          cancelled: appointments.filter((apt: any) => apt.status === 'Canceled').length,
         },
         userRegistrationTrend: generateTrendData(users, 'created_at'),
         appointmentTrend: generateTrendData(appointments, 'appointment_day')

@@ -10,6 +10,16 @@ from ..schemas import MedicalReportCreate, MedicalReportUpdate
 class MedicalReportRepository:
 
     @staticmethod
+    def get_all(db: Session, skip: int = 0, limit: int = 100) -> List[MedicalReport]:
+        return (
+            db.query(MedicalReport)
+            .order_by(MedicalReport.in_day.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
+    @staticmethod
     def get_by_id(db: Session, record_id: int) -> Optional[MedicalReport]:
         return db.query(MedicalReport).filter(MedicalReport.record_id == record_id).first()
 

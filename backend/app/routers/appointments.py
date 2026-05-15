@@ -7,7 +7,7 @@ from ..database import get_db
 from ..models import User
 from ..schemas import AppointmentSchema, AppointmentCreate, AppointmentUpdate, AvailableSlot
 from ..services import AppointmentService
-from ..dependencies import get_current_active_user
+from ..dependencies import get_current_active_user, get_current_clinic_staff_or_admin
 
 router = APIRouter(
     tags=["Appointments"],
@@ -25,7 +25,12 @@ async def create_appointment(
 
 
 @router.get("/", response_model=List[AppointmentSchema])
-def get_all_appointments(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def get_all_appointments(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_clinic_staff_or_admin),
+):
     return AppointmentService.get_all(db, skip, limit)
 
 

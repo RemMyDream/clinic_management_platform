@@ -39,7 +39,7 @@ const DoctorDashboard = () => {
     const fetchDashboardData = async () => {
       try {
         const [apptRes, patientsRes] = await Promise.all([
-          appointmentApi.getAll(0, 500),
+          appointmentApi.getMyAppointments(),
           patientApi.getAll(0, 500),
         ]);
 
@@ -54,7 +54,7 @@ const DoctorDashboard = () => {
           );
 
         const upcomingAppointments = apptRes.data.filter((a: Appointment) =>
-          new Date(a.appointment_day) > todayStart
+          new Date(a.appointment_day) >= todayStart && a.status === 'Scheduled'
         ).length;
 
         const completedToday = todayAppointments.filter(

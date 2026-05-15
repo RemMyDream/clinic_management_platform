@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import api from '../services/api';
 
 const ResetPasswordPage: React.FC = () => {
     const [searchParams] = useSearchParams();
@@ -37,7 +38,7 @@ const ResetPasswordPage: React.FC = () => {
         setLoading(true);
 
         try {
-            const response = await axios.post('http://127.0.0.1:8000/password/reset-password', {
+            const response = await api.post('/password/reset-password', {
                 token,
                 new_password: newPassword,
             });

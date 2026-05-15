@@ -26,7 +26,7 @@ class MedicalReportService:
         elif role == UserRole.PATIENT.value:
             return MedicalReportRepository.get_for_patient(db, current_user.user_id)
         elif role in [UserRole.ADMIN.value, UserRole.CLINIC_STAFF.value]:
-            return MedicalReportRepository.get_by_doctor(db, 0, limit=1000)
+            return MedicalReportRepository.get_all(db)
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     @staticmethod
@@ -40,11 +40,19 @@ class MedicalReportService:
         return report
 
     @staticmethod
+    def _can_modify_report(current_user: User, report: MedicalReport) -> bool:
+        if current_user.role.value == UserRole.ADMIN.value:
+            return True
+        if current_user.role.value == UserRole.DOCTOR.value and current_user.user_id == report.doctor_id:
+            return True
+        return False
+
+    @staticmethod
     def update(db: Session, record_id: int, report_update: MedicalReportUpdate, current_user: User) -> MedicalReport:
         report = MedicalReportRepository.get_by_id(db, record_id)
         if not report:
             raise HTTPException(status_code=404, detail="Medical report not found.")
-        if current_user.role.value != UserRole.DOCTOR.value and current_user.user_id != report.doctor_id:
+        if not MedicalReportService._can_modify_report(current_user, report):
             raise HTTPException(status_code=403, detail="Not enough permissions")
         updated = MedicalReportRepository.update(db, record_id, report_update)
         if not updated:
@@ -56,7 +64,7 @@ class MedicalReportService:
         report = MedicalReportRepository.get_by_id(db, record_id)
         if not report:
             raise HTTPException(status_code=404, detail="Medical report not found.")
-        if current_user.role.value != UserRole.DOCTOR.value and current_user.user_id != report.doctor_id:
+        if not MedicalReportService._can_modify_report(current_user, report):
             raise HTTPException(status_code=403, detail="Not enough permissions")
         MedicalReportRepository.delete(db, record_id)
 

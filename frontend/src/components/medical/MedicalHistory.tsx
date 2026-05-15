@@ -376,10 +376,10 @@ const MedicalHistory = () => {
           ) : (
             <div className={styles.reportsGrid}>
               <div className={styles.reportsList}>
-                <h3>Medical Reports ({filteredReports.length})</h3>
+                <h3>Báo cáo y tế ({filteredReports.length})</h3>
                 {filteredReports.length === 0 ? (
                   <div className={styles.noData}>
-                    <p>No reports match your search criteria.</p>
+                    <p>Không tìm thấy báo cáo phù hợp với tiêu chí tìm kiếm.</p>
                   </div>
                 ) : (
                   filteredReports.map((report) => (
@@ -389,17 +389,17 @@ const MedicalHistory = () => {
                       onClick={() => handleReportSelect(report)}
                     >
                       <div className={styles.reportHeader}>
-                        <h4>Report #{report.record_id}</h4>
+                        <h4>Báo cáo #{report.record_id}</h4>
                         <span className={styles.date}>{formatDate(report.in_day)}</span>
                       </div>
                       <div className={styles.reportPreview}>
-                        <p><strong>Diagnosis:</strong> {report.in_diagnosis || 'N/A'}</p>
-                        <p><strong>Reason:</strong> {report.reason_in || 'N/A'}</p>
+                        <p><strong>Chẩn đoán:</strong> {report.in_diagnosis || 'N/A'}</p>
+                        <p><strong>Lý do:</strong> {report.reason_in || 'N/A'}</p>
                         <div className={styles.statusBadge}>
                           {report.out_day && report.out_day !== '' ? (
-                            <span className={styles.completed}>Completed</span>
+                            <span className={styles.completed}>Hoàn thành</span>
                           ) : (
-                            <span className={styles.active}>Active</span>
+                            <span className={styles.active}>Đang điều trị</span>
                           )}
                         </div>
                       </div>
@@ -411,34 +411,34 @@ const MedicalHistory = () => {
               {selectedReport && (
                 <div className={styles.reportDetails}>
                   <div className={styles.detailsHeader}>
-                    <h3>Medical Report #{selectedReport.record_id}</h3>
+                    <h3>Báo cáo y tế #{selectedReport.record_id}</h3>
                     <button className={styles.closeButton} onClick={handleCloseDetails}>×</button>
                   </div>
 
                   <div className={styles.detailsContent}>
                     <div className={styles.section}>
-                      <h4>Basic Information</h4>
+                      <h4>Thông tin cơ bản</h4>
                       <div className={styles.infoGrid}>
                         <div className={styles.infoItem}>
-                          <strong>Admission Date:</strong> {formatDate(selectedReport.in_day)}
+                          <strong>Ngày nhập viện:</strong> {formatDate(selectedReport.in_day)}
                         </div>
                         <div className={styles.infoItem}>
-                          <strong>Discharge Date:</strong> {formatDate(selectedReport.out_day)}
+                          <strong>Ngày xuất viện:</strong> {formatDate(selectedReport.out_day)}
                         </div>
                         <div className={styles.infoItem}>
-                          <strong>Reason for Visit:</strong> {selectedReport.reason_in || 'N/A'}
+                          <strong>Lý do khám:</strong> {selectedReport.reason_in || 'N/A'}
                         </div>
                       </div>
                     </div>
 
                     <div className={styles.section}>
-                      <h4>Diagnosis & Treatment</h4>
+                      <h4>Chẩn đoán & Điều trị</h4>
                       <div className={styles.infoItem}>
-                        <strong>Initial Diagnosis:</strong>
+                        <strong>Chẩn đoán ban đầu:</strong>
                         <p>{selectedReport.in_diagnosis || 'N/A'}</p>
                       </div>
                       <div className={styles.infoItem}>
-                        <strong>Final Diagnosis:</strong>
+                        <strong>Chẩn đoán cuối cùng:</strong>
                         <p>{selectedReport.out_diagnosis || 'N/A'}</p>
                       </div>
                       <div className={styles.infoItem}>

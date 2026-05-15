@@ -51,6 +51,14 @@ const [doctors, setDoctors] = useState<Doctor[]>([]);
   }, []);
 
   const fetchAvailableSlots = async () => {
+    if (!filters.dateFrom || !filters.dateTo) {
+      setError('Vui lòng chọn khoảng thời gian.');
+      return;
+    }
+    if (filters.dateFrom > filters.dateTo) {
+      setError('Ngày bắt đầu phải trước ngày kết thúc.');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
