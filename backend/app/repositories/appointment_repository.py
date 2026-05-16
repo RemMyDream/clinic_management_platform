@@ -38,10 +38,10 @@ class AppointmentRepository:
         )
 
     @staticmethod
-    def create(db: Session, appointment: AppointmentCreate, creator_id: int) -> Appointment:
+    def create(db: Session, appointment: AppointmentCreate, patient_id: int, initial_status: AppointmentStatus = AppointmentStatus.PENDING) -> Appointment:
         appointment_data = appointment.model_dump()
-        appointment_data["patient_id"] = creator_id
-        appointment_data["status"] = AppointmentStatus.SCHEDULED
+        appointment_data["patient_id"] = patient_id
+        appointment_data["status"] = initial_status
         db_appointment = Appointment(**appointment_data)
         db.add(db_appointment)
         db.commit()
@@ -81,6 +81,26 @@ class AppointmentRepository:
         return db_appointment
 
     @staticmethod
+    def confirm(db: Session, appointment_id: int) -> Optional[Appointment]:
+        db_appointment = AppointmentRepository.get_by_id(db, appointment_id)
+        if not db_appointment:
+            return None
+        db_appointment.status = AppointmentStatus.CONFIRMED
+        db.commit()
+        db.refresh(db_appointment)
+        return db_appointment
+
+    @staticmethod
+    def accept(db: Session, appointment_id: int) -> Optional[Appointment]:
+        db_appointment = AppointmentRepository.get_by_id(db, appointment_id)
+        if not db_appointment:
+            return None
+        db_appointment.status = AppointmentStatus.SCHEDULED
+        db.commit()
+        db.refresh(db_appointment)
+        return db_appointment
+
+    @staticmethod
     def delete(db: Session, appointment_id: int) -> Optional[Appointment]:
         db_appointment = AppointmentRepository.get_by_id(db, appointment_id)
         if not db_appointment:
@@ -98,7 +118,10 @@ class AppointmentRepository:
         slot_duration = timedelta(hours=1)
 
         doctors = db.query(Doctor).all()
-        appointments = db.query(Appointment).filter(Appointment.appointment_day == day).all()
+        appointments = db.query(Appointment).filter(
+            Appointment.appointment_day == day,
+            ~Appointment.status.in_([AppointmentStatus.PENDING, AppointmentStatus.CANCELED]),
+        ).all()
         taken_slots = set((appt.doctor_id, appt.appointment_time) for appt in appointments)
 
         available_slots: List[AvailableSlot] = []

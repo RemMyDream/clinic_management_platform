@@ -1,4 +1,5 @@
-/* Appointments.css */
+/* ViewAppointment - Modern calendar & appointment view */
+
 .appointments-container {
   max-width: 900px;
   margin: 0 auto;
@@ -8,10 +9,13 @@
 
 .appointments-header {
   font-size: 2rem;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 1.5rem;
   text-align: center;
-  color: #2c3e50;
+  background: linear-gradient(135deg, #2c3e50, #3498db);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .loading-spinner {
@@ -20,6 +24,9 @@
   justify-content: center;
   align-items: center;
   height: 200px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 .loading-spinner p {
@@ -28,32 +35,57 @@
   color: #555;
 }
 
-.appointment-dot {
-  height: 6px;
-  width: 6px;
-  background-color: #1976d2; /* MUI primary color */
-  border-radius: 50%;
-  margin-top: 2px;
+/* Calendar days with appointments are highlighted via inline sx prop (orange) */
+
+.error-message {
+  background: #fff5f5;
+  color: #e53e3e;
+  border: 1px solid #fed7d7;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
 }
 
 .appointments-table {
   width: 100%;
-  border-collapse: collapse;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-  margin-top: 1rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  margin-top: 1.5rem;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
 }
 
 .appointments-table th,
 .appointments-table td {
-  padding: 1rem;
+  padding: 1rem 1.2rem;
   text-align: left;
-  border-bottom: 1px solid #e1e1e1;
 }
 
 .appointments-table thead th {
-  background-color: #f8f9fa;
-  color: #34495e;
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  color: #fff;
   font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: none;
+}
+
+.appointments-table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s, transform 0.15s;
+}
+
+.appointments-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.appointments-table tbody td {
+  color: #4a5568;
+  font-size: 0.95rem;
 }
 
 @media (max-width: 600px) {
@@ -61,23 +93,25 @@
     display: none;
   }
 
-  .appointments-table, 
-  .appointments-table tbody, 
-  .appointments-table tr, 
+  .appointments-table,
+  .appointments-table tbody,
+  .appointments-table tr,
   .appointments-table td {
     display: block;
     width: 100%;
   }
 
   .appointments-table tr {
-    margin-bottom: 1.2rem;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.75rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   }
 
   .appointments-table td {
-    padding: 0.6rem 1rem;
+    padding: 0.5rem 1rem;
     text-align: right;
     position: relative;
   }
@@ -86,7 +120,7 @@
     content: attr(data-label);
     position: absolute;
     left: 1rem;
-    top: 0.6rem;
+    top: 0.5rem;
     font-weight: bold;
     color: #333;
     text-transform: capitalize;
@@ -95,99 +129,116 @@
 
 .clickable-row {
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.15s;
 }
 
 .clickable-row:hover {
-  background-color: #f1f1f1;
+  background-color: #f7fafc;
+  transform: translateX(3px);
 }
 
-/* Center modal with flexbox on parent (Modal) */
+/* Modal */
 .MuiModal-root {
   display: flex !important;
   align-items: center;
   justify-content: center;
 }
 
-/* Modal box styling */
 .appointment-modal {
   background: white;
-  padding: 24px;
-  border-radius: 12px;
+  padding: 28px;
+  border-radius: 16px;
   width: 100%;
-  max-width: 480px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  max-width: 500px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
   outline: none;
 }
 
 .appointment-modal h2 {
   margin-bottom: 16px;
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #2c3e50;
 }
 
 .appointment-modal p {
-  margin: 8px 0;
-  font-size: 16px;
+  margin: 10px 0;
+  font-size: 15px;
+  color: #4a5568;
 }
 
-/* Reschedule section layout */
+.appointment-modal p strong {
+  color: #2c3e50;
+}
+
+/* Reschedule section */
 .reschedule-section {
-  background-color: #fff;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #f8fafc, #edf2f7);
+  border-radius: 14px;
   padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
+  border: 1px solid #e2e8f0;
   margin-top: 20px;
 }
 
 .reschedule-title {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   margin-bottom: 16px;
-  color: #333;
+  color: #2c3e50;
 }
 
-.form-group {
+.reschedule-section .form-group {
   display: flex;
   flex-direction: column;
   margin-bottom: 16px;
 }
 
-.form-group label {
+.reschedule-section .form-group label {
   margin-bottom: 6px;
-  font-weight: 500;
-  color: #555;
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 0.9rem;
 }
 
-input[type="date"],
-select {
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  transition: border 0.2s;
+.reschedule-section input[type="date"],
+.reschedule-section select {
+  padding: 10px 14px;
+  font-size: 15px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 10px;
+  transition: border 0.2s, box-shadow 0.2s;
+  background: #fff;
 }
 
-input[type="date"]:focus,
-select:focus {
-  border-color: #3f51b5;
+.reschedule-section input[type="date"]:focus,
+.reschedule-section select:focus {
+  border-color: #5b8def;
+  box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.15);
   outline: none;
 }
 
 .confirm-button {
-  background-color: #3f51b5;
+  background: linear-gradient(135deg, #3f51b5, #5c6bc0);
   color: white;
   padding: 12px;
   width: 100%;
-  font-size: 16px;
+  font-size: 15px;
+  font-weight: 600;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
 .confirm-button:hover {
-  background-color: #303f9f;
+  background: linear-gradient(135deg, #303f9f, #3f51b5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.3);
 }
 
+.confirm-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}

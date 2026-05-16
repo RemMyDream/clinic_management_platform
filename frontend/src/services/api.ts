@@ -18,7 +18,8 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const url = error.config?.url || '';
+    if (error.response?.status === 401 && !url.includes('/auth/token')) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('role');
       localStorage.removeItem('user_id');
@@ -39,6 +40,8 @@ export const appointmentApi = {
   book: (payload: object) => api.post('/appointments/book', payload),
   update: (id: number, payload: object) => api.put(`/appointments/${id}`, payload),
   cancel: (id: number) => api.post(`/appointments/${id}/cancel`),
+  confirm: (id: number) => api.post(`/appointments/${id}/confirm`),
+  accept: (id: number) => api.post(`/appointments/${id}/accept`),
   complete: (id: number) => api.post(`/appointments/${id}/complete`),
   delete: (id: number) => api.delete(`/appointments/${id}`),
   getAvailableSlots: (day: string) => api.get('/appointments/available', { params: { day } }),
@@ -96,6 +99,11 @@ export const otcApi = {
   create: (payload: object) => api.post('/otc_medications/', payload),
   update: (id: number, payload: object) => api.put(`/otc_medications/${id}`, payload),
   delete: (id: number) => api.delete(`/otc_medications/${id}`),
+};
+
+export const provinceApi = {
+  getAll: () => api.get('/provinces/'),
+  getDistricts: (provinceId: number) => api.get(`/provinces/${provinceId}/districts`),
 };
 
 export const chatApi = {

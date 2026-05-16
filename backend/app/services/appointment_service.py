@@ -16,7 +16,9 @@ class AppointmentService:
 
     @staticmethod
     def create(db: Session, appointment: AppointmentCreate, current_user: User) -> Appointment:
-        return AppointmentRepository.create(db, appointment, current_user.user_id)
+        if current_user.role.value in [UserRole.CLINIC_STAFF.value, UserRole.ADMIN.value]:
+            return AppointmentRepository.create(db, appointment, appointment.patient_id, AppointmentStatus.CONFIRMED)
+        return AppointmentRepository.create(db, appointment, current_user.user_id, AppointmentStatus.PENDING)
 
     @staticmethod
     def get_all(db: Session, skip: int = 0, limit: int = 100) -> List[Appointment]:
@@ -68,6 +70,26 @@ class AppointmentService:
         if not completed:
             raise HTTPException(status_code=404, detail="Appointment not found")
         return completed
+
+    @staticmethod
+    def confirm(db: Session, appointment_id: int, current_user: User) -> Appointment:
+        AppointmentService.get_appointment(db, appointment_id, current_user)
+        if current_user.role.value not in [UserRole.CLINIC_STAFF.value, UserRole.ADMIN.value]:
+            raise HTTPException(status_code=403, detail="Only staff/admin can confirm appointments")
+        confirmed = AppointmentRepository.confirm(db, appointment_id)
+        if not confirmed:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+        return confirmed
+
+    @staticmethod
+    def accept(db: Session, appointment_id: int, current_user: User) -> Appointment:
+        AppointmentService.get_appointment(db, appointment_id, current_user)
+        if current_user.role.value not in [UserRole.DOCTOR.value, UserRole.CLINIC_STAFF.value, UserRole.ADMIN.value]:
+            raise HTTPException(status_code=403, detail="Only doctors/staff/admin can accept appointments")
+        accepted = AppointmentRepository.accept(db, appointment_id)
+        if not accepted:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+        return accepted
 
     @staticmethod
     def delete(db: Session, appointment_id: int, current_user: User) -> Appointment:

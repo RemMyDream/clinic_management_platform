@@ -1,0 +1,193 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 50%, #e0f2f1 100%);
+  padding: 2rem;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 520px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a7f42;
+  margin: 0 0 2rem 0;
+  text-align: center;
+}
+
+/* Stepper */
+.steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 2rem;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepNum {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: #e5e7eb;
+  color: #9ca3af;
+  transition: all 0.3s;
+}
+
+.stepActive .stepNum {
+  background: #1a7f42;
+  color: #fff;
+}
+
+.stepDone .stepNum {
+  background: #1a7f42;
+  color: #fff;
+}
+
+.stepLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #9ca3af;
+}
+
+.stepActive .stepLabel {
+  color: #1a7f42;
+}
+
+.stepDone .stepLabel {
+  color: #1a7f42;
+}
+
+.stepLine {
+  width: 40px;
+  height: 2px;
+  background: #e5e7eb;
+  margin: 0 12px;
+}
+
+/* Form */
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4a5568;
+  margin-bottom: 6px;
+}
+
+.required {
+  color: #e53e3e;
+}
+
+.field input,
+.field select {
+  padding: 11px 14px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: #fafbfc;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: #1a7f42;
+  box-shadow: 0 0 0 3px rgba(26, 127, 66, 0.12);
+}
+
+.field input[readOnly] {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Buttons */
+.primaryBtn {
+  padding: 13px;
+  background: linear-gradient(135deg, #1a7f42, #15803d);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+}
+
+.primaryBtn:hover {
+  background: linear-gradient(135deg, #15803d, #0d6630);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26, 127, 66, 0.3);
+}
+
+.primaryBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.secondaryBtn {
+  padding: 13px;
+  background: #fff;
+  color: #1a7f42;
+  border: 1.5px solid #1a7f42;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.secondaryBtn:hover {
+  background: #f0fdf4;
+}
+
+.btnRow {
+  display: flex;
+  gap: 12px;
+  margin-top: 0.5rem;
+}
+
+.btnRow button {
+  flex: 1;
+}
+
+@media (max-width: 600px) {
+  .card {
+    padding: 1.5rem;
+  }
+
+  .stepLabel {
+    display: none;
+  }
+}

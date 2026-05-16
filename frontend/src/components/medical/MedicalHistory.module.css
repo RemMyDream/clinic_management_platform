@@ -396,8 +396,8 @@
 .viewModeToggle {
   display: flex;
   gap: 0;
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-sm);
+  border: 2px solid var(--color-primary, #007bff);
+  border-radius: 10px;
   overflow: hidden;
   width: fit-content;
 }
@@ -409,8 +409,10 @@
   padding: var(--spacing-sm) var(--spacing-lg);
   cursor: pointer;
   font-size: var(--font-size-sm);
+  font-weight: 600;
+  letter-spacing: 0.5px;
   transition: var(--transition-all);
-  border-right: 1px solid var(--color-border);
+  border-right: 2px solid var(--color-primary, #007bff);
 }
 
 .toggleButton:last-child {
@@ -549,6 +551,13 @@
   font-size: var(--font-size-sm);
 }
 
+.timelineFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-sm);
+}
+
 .viewDetailsButton {
   background: var(--color-primary);
   color: var(--color-white);
@@ -595,22 +604,26 @@
 }
 
 .active, .completed {
-  padding: 4px 8px;
-  border-radius: var(--border-radius-full);
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border: 1.5px solid transparent;
 }
 
 .active {
-  background: var(--color-success-light);
-  color: var(--color-success-dark);
+  background: #e6f9ee;
+  color: #1a7f42;
+  border-color: #b2dfcc;
 }
 
 .completed {
-  background: var(--color-primary-light);
-  color: var(--color-primary-dark);
+  background: #e8f0fe;
+  color: #1a56db;
+  border-color: #b4ccf0;
 }
 
 /* Report Details Panel */

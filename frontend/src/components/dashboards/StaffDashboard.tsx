@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import styles from './StaffDashboard.module.css';
 import { appointmentApi, patientApi, doctorApi } from '../../services/api';
 
@@ -16,6 +17,8 @@ type Appointment = {
 };
 
 const STATUS_LABEL: Record<string, string> = {
+  Pending: 'Chờ xác nhận',
+  Confirmed: 'Đã xác nhận',
   Scheduled: 'Đã lên lịch',
   Completed: 'Hoàn thành',
   Canceled: 'Đã hủy',
@@ -25,25 +28,28 @@ const STATUS_LABEL: Record<string, string> = {
 const StaffDashboard = () => {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [stats, setStats] = useState({ todayAppointments: 0, totalPatients: 0, pendingCheckIns: 0, completedToday: 0 });
+  const [pendingAppointments, setPendingAppointments] = useState<Appointment[]>([]);
+  const [stats, setStats] = useState({ todayAppointments: 0, totalPatients: 0, pendingRequests: 0, completedToday: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const [apptRes, patientsRes] = await Promise.all([
-          appointmentApi.getAll(0, 500),
-          patientApi.getAll(0, 500),
-        ]);
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      const [apptRes, patientsRes] = await Promise.all([
+        appointmentApi.getAll(0, 500),
+        patientApi.getAll(0, 500),
+      ]);
 
-        const today = new Date().toISOString().split('T')[0];
-        const todayAppointments: Appointment[] = apptRes.data.filter(
-          (a: Appointment) => a.appointment_day === today
-        );
+      const today = new Date().toISOString().split('T')[0];
+      const allAppointments: Appointment[] = apptRes.data;
+      const todayAppointments = allAppointments.filter(
+        (a: Appointment) => a.appointment_day === today
+      );
+      const pending = allAppointments.filter((a: Appointment) => a.status === 'Pending');
 
-        const enriched = await Promise.all(
-          todayAppointments.map(async (a: Appointment) => {
+      const enrichAll = async (list: Appointment[]) =>
+        Promise.all(
+          list.map(async (a: Appointment) => {
             try {
               const [patRes, docRes] = await Promise.all([
                 patientApi.getById(a.patient_id),
@@ -56,27 +62,50 @@ const StaffDashboard = () => {
           })
         );
 
-        enriched.sort((a, b) =>
-          new Date(`1970-01-01T${a.appointment_time}`).getTime() -
-          new Date(`1970-01-01T${b.appointment_time}`).getTime()
-        );
+      const [enrichedToday, enrichedPending] = await Promise.all([
+        enrichAll(todayAppointments),
+        enrichAll(pending),
+      ]);
 
-        setAppointments(enriched);
-        setStats({
-          todayAppointments: enriched.length,
-          totalPatients: patientsRes.data.length,
-          pendingCheckIns: enriched.filter((a) => a.status === 'Scheduled').length,
-          completedToday: enriched.filter((a) => a.status === 'Completed').length,
-        });
-      } catch {
-        setError('Không thể tải dữ liệu bảng điều khiển.');
-      } finally {
-        setLoading(false);
-      }
-    };
+      enrichedToday.sort((a, b) =>
+        new Date(`1970-01-01T${a.appointment_time}`).getTime() -
+        new Date(`1970-01-01T${b.appointment_time}`).getTime()
+      );
 
-    fetchDashboardData();
+      setAppointments(enrichedToday);
+      setPendingAppointments(enrichedPending);
+      setStats({
+        todayAppointments: enrichedToday.length,
+        totalPatients: patientsRes.data.length,
+        pendingRequests: pending.length,
+        completedToday: enrichedToday.filter((a) => a.status === 'Completed').length,
+      });
+    } catch {
+      setError('Không thể tải dữ liệu bảng điều khiển.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => { fetchDashboardData(); }, [fetchDashboardData]);
+
+  const handleConfirm = async (appointmentId: number) => {
+    try {
+      await appointmentApi.confirm(appointmentId);
+      toast.success('Đã xác nhận lịch hẹn.');
+      fetchDashboardData();
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Không thể xác nhận lịch hẹn.');
+    }
+  };
+
+  const formatDate = (d: string) => {
+    if (!d) return '';
+    const dt = new Date(d);
+    const dd = String(dt.getDate()).padStart(2, '0');
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    return `${dd}/${mm}/${dt.getFullYear()}`;
+  };
 
   const quickActions = [
     { title: 'Lên lịch cuộc hẹn', description: 'Đặt cuộc hẹn cho bệnh nhân', icon: '📅', action: () => navigate('/dashboard/appointments/schedule'), color: '#3498db' },
@@ -101,7 +130,7 @@ const StaffDashboard = () => {
         {[
           { icon: '📅', label: 'Cuộc hẹn hôm nay', value: stats.todayAppointments },
           { icon: '👥', label: 'Tổng số bệnh nhân', value: stats.totalPatients },
-          { icon: '⏳', label: 'Chờ check-in', value: stats.pendingCheckIns },
+          { icon: '⏳', label: 'Yêu cầu chờ duyệt', value: stats.pendingRequests },
           { icon: '✅', label: 'Hoàn thành hôm nay', value: stats.completedToday },
         ].map((s) => (
           <div key={s.label} className={styles.statCard}>
@@ -128,6 +157,36 @@ const StaffDashboard = () => {
           ))}
         </div>
       </div>
+
+      {pendingAppointments.length > 0 && (
+        <div className={styles.section}>
+          <h3 className={styles.sectionTitle}>Yêu cầu đặt lịch chờ duyệt ({pendingAppointments.length})</h3>
+          <div className={styles.appointmentsTable}>
+            <div className={styles.tableHeader}>
+              <div>Ngày</div>
+              <div>Giờ</div>
+              <div>Bệnh nhân</div>
+              <div>Bác sĩ</div>
+              <div>Lý do</div>
+              <div>Thao tác</div>
+            </div>
+            {pendingAppointments.map((a) => (
+              <div key={a.appointment_id} className={styles.tableRow}>
+                <div>{formatDate(a.appointment_day)}</div>
+                <div className={styles.timeCell}>{a.appointment_time}</div>
+                <div>{a.patientName}</div>
+                <div>{a.doctorName}</div>
+                <div className={styles.reasonCell}>{a.reason}</div>
+                <div>
+                  <button className={styles.confirmBtn} onClick={() => handleConfirm(a.appointment_id)}>
+                    Xác nhận
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className={styles.section}>
         <h3 className={styles.sectionTitle}>Lịch hôm nay</h3>

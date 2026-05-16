@@ -5,6 +5,7 @@ import LoginPage from './components/LoginPage';
 import ForgotPasswordPage from './components/ForgotPasswordPage';
 import ResetPasswordPage from './components/ResetPasswordPage';
 import RegisterPage from './components/RegisterPage';
+import ProfileOnboarding from './components/ProfileOnboarding';
 import DashboardWrapper from './pages/DashboardWrapper';
 import ChatbotWidget from './components/Chatbot/ChatbotWidget';
 import Profile from './pages/Profile';
@@ -49,6 +50,14 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/complete-profile"
+            element={
+              <ProtectedRoute>
+                <ProfileOnboarding />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard/*"
             element={

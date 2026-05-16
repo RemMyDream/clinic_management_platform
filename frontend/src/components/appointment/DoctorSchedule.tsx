@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
-import { Badge, CircularProgress, Box, Modal } from '@mui/material';
+import { CircularProgress, Box, Modal, Chip } from '@mui/material';
 import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
 import dayjs from 'dayjs';
+import { toast } from 'react-toastify';
 import styles from './DoctorSchedule.module.css';
 import { appointmentApi, patientApi } from '../../services/api';
 
@@ -15,7 +16,26 @@ type Appointment = {
   appointment_day: string;
   reason: string;
   appointment_id: number;
+  status: string;
   patientName?: string;
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  Pending: 'Chờ xác nhận',
+  Confirmed: 'Đã xác nhận',
+  Scheduled: 'Đã lên lịch',
+  Completed: 'Hoàn thành',
+  Canceled: 'Đã hủy',
+  'No Show': 'Vắng mặt',
+};
+
+const STATUS_COLOR: Record<string, 'default' | 'primary' | 'success' | 'error' | 'warning'> = {
+  Pending: 'warning',
+  Confirmed: 'primary',
+  Scheduled: 'success',
+  Completed: 'success',
+  Canceled: 'error',
+  'No Show': 'warning',
 };
 
 const DoctorSchedule = () => {
@@ -26,39 +46,58 @@ const DoctorSchedule = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const res = await appointmentApi.getMyAppointments();
-        const today = new Date().toISOString().split('T')[0];
-        const upcoming = res.data.filter((a: Appointment) => a.appointment_day >= today);
+  const fetchAppointments = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await appointmentApi.getMyAppointments();
+      const today = new Date().toISOString().split('T')[0];
+      const upcoming = res.data.filter((a: Appointment) => a.appointment_day >= today);
 
-        const enriched = await Promise.all(
-          upcoming.map(async (a: Appointment) => {
-            try {
-              const p = await patientApi.getById(a.patient_id);
-              return { ...a, patientName: p.data.full_name };
-            } catch {
-              return { ...a, patientName: 'Bệnh nhân không xác định' };
-            }
-          })
-        );
+      const enriched = await Promise.all(
+        upcoming.map(async (a: Appointment) => {
+          try {
+            const p = await patientApi.getById(a.patient_id);
+            return { ...a, patientName: p.data.full_name };
+          } catch {
+            return { ...a, patientName: 'Bệnh nhân không xác định' };
+          }
+        })
+      );
 
-        enriched.sort((a: Appointment, b: Appointment) =>
-          new Date(`${a.appointment_day}T${a.appointment_time}`).getTime() -
-          new Date(`${b.appointment_day}T${b.appointment_time}`).getTime()
-        );
+      enriched.sort((a: Appointment, b: Appointment) =>
+        new Date(`${a.appointment_day}T${a.appointment_time}`).getTime() -
+        new Date(`${b.appointment_day}T${b.appointment_time}`).getTime()
+      );
 
-        setAppointments(enriched);
-      } catch {
-        setError('Không thể tải danh sách lịch hẹn.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAppointments();
+      setAppointments(enriched);
+    } catch {
+      setError('Không thể tải danh sách lịch hẹn.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => { fetchAppointments(); }, [fetchAppointments]);
+
+  const handleAccept = async () => {
+    if (!selectedAppointment) return;
+    try {
+      await appointmentApi.accept(selectedAppointment.appointment_id);
+      toast.success('Đã chấp nhận lịch hẹn.');
+      setModalOpen(false);
+      fetchAppointments();
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Không thể chấp nhận lịch hẹn.');
+    }
+  };
+
+  const formatDate = (d: string) => {
+    if (!d) return '';
+    const dt = new Date(d);
+    const dd = String(dt.getDate()).padStart(2, '0');
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    return `${dd}/${mm}/${dt.getFullYear()}`;
+  };
 
   const handleAppointmentClick = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
@@ -70,21 +109,26 @@ const DoctorSchedule = () => {
     );
   
 
-  const appointmentDates = appointments.map((appointment) => appointment.appointment_day);
+  const appointmentDates = new Set(appointments.map((appointment) => appointment.appointment_day));
 
   const CustomDay = (props: PickersDayProps) => {
     const { day, outsideCurrentMonth, ...other } = props;
     const dateString = day.format('YYYY-MM-DD');
-    const hasAppointment = appointmentDates.includes(dateString);
+    const hasAppointment = appointmentDates.has(dateString);
 
     return (
-      <Badge
-        key={dateString}
-        overlap="circular"
-        badgeContent={hasAppointment ? <span className={styles.appointmentDot} /> : undefined}
-      >
-        <PickersDay day={day} outsideCurrentMonth={outsideCurrentMonth} {...other} />
-      </Badge>
+      <PickersDay
+        day={day}
+        outsideCurrentMonth={outsideCurrentMonth}
+        {...other}
+        sx={hasAppointment && !outsideCurrentMonth ? {
+          backgroundColor: '#f57c00 !important',
+          color: '#fff !important',
+          fontWeight: 700,
+          '&:hover': { backgroundColor: '#ef6c00 !important' },
+          '&.Mui-selected': { backgroundColor: '#e65100 !important' },
+        } : undefined}
+      />
     );
   };
 
@@ -124,6 +168,7 @@ const DoctorSchedule = () => {
                 <th>Giờ</th>
                 <th>Bệnh nhân</th>
                 <th>Lý do</th>
+                <th>Trạng thái</th>
               </tr>
             </thead>
             <tbody>
@@ -138,6 +183,13 @@ const DoctorSchedule = () => {
                   <td>{appointment.appointment_time}</td>
                   <td>{appointment.patientName}</td>
                   <td>{appointment.reason}</td>
+                  <td>
+                    <Chip
+                      label={STATUS_LABEL[appointment.status] || appointment.status}
+                      color={STATUS_COLOR[appointment.status] || 'default'}
+                      size="small"
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -152,8 +204,26 @@ const DoctorSchedule = () => {
             {selectedAppointment && (
                 <>
                   <p><strong>Bệnh nhân:</strong> {selectedAppointment.patientName}</p>
-                  <p><strong>Ngày:</strong> {selectedAppointment.appointment_day}</p>
+                  <p><strong>Ngày:</strong> {formatDate(selectedAppointment.appointment_day)}</p>
                   <p><strong>Giờ:</strong> {selectedAppointment.appointment_time}</p>
+                  <p><strong>Trạng thái:</strong>{' '}
+                    <Chip
+                      label={STATUS_LABEL[selectedAppointment.status] || selectedAppointment.status}
+                      color={STATUS_COLOR[selectedAppointment.status] || 'default'}
+                      size="small"
+                    />
+                  </p>
+
+                  {selectedAppointment.status === 'Confirmed' && (
+                    <Box mt={2}>
+                      <button
+                        className={styles.acceptButton}
+                        onClick={handleAccept}
+                      >
+                        Chấp nhận lịch hẹn
+                      </button>
+                    </Box>
+                  )}
 
                   {error && (
                   <Box mt={2} color="error.main">

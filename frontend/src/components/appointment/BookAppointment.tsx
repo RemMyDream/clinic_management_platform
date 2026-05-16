@@ -1,48 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { appointmentApi, doctorApi } from '../../services/api';
 import './bookAppointment.css';
 
-const BookAppointment: React.FC = () => {
-  type FormData = {
-    date: string;
-    time: string;
-    doctorId: number | null;
-    reason: string
-  };
-  const [formData, setFormData] = useState<FormData>({
-    date: '',
-    time: '',
-    doctorId: null,
-    reason: '',
-  });
-  type Doctor = {
+type FormData = {
+  date: string;
+  time: string;
+  doctorId: number | null;
+  reason: string;
+};
+
+type Doctor = {
   doctor_id: number;
   doctor_name: string;
   major: string;
   hospital_id: number;
 };
-const [doctors, setDoctors] = useState<Doctor[]>([]);
-  type Slot = {
-    id: string;
-    date: string;
-    time: string;
-    doctorName: string;
-    doctorId: number;
-  };
-  type Filters = {
+
+type Slot = {
+  id: string;
+  date: string;
+  time: string;
+  doctorName: string;
+  doctorId: number;
+};
+
+type Filters = {
   service: string;
   dateFrom: string;
   dateTo: string;
-  doctorId: number | null;
 };
+
+const BookAppointment: React.FC = () => {
+  const [formData, setFormData] = useState<FormData>({ date: '', time: '', doctorId: null, reason: '' });
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
-  const [filters, setFilters] = useState<Filters>({ service: '', dateFrom: '', dateTo: '', doctorId: null });
+  const [filters, setFilters] = useState<Filters>({ service: '', dateFrom: '', dateTo: '' });
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [filterByDoctor, setFilterByDoctor] = useState(false);
+  const [filterDoctorIds, setFilterDoctorIds] = useState<number[]>([]);
+  const [showDoctorFilter, setShowDoctorFilter] = useState(false);
+  const [cellPopup, setCellPopup] = useState<{ date: string; time: string } | null>(null);
+
+  const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     doctorApi.getAll()
@@ -50,9 +52,42 @@ const [doctors, setDoctors] = useState<Doctor[]>([]);
       .catch(() => setError('Không thể lấy danh sách bác sĩ.'));
   }, []);
 
+  const slotDoctors = useMemo(() => {
+    const map = new Map<number, string>();
+    slots.forEach((s) => map.set(s.doctorId, s.doctorName));
+    return Array.from(map, ([id, name]) => ({ id, name }));
+  }, [slots]);
+
+  const filteredSlots = useMemo(() => {
+    if (filterDoctorIds.length === 0) return slots;
+    return slots.filter((s) => filterDoctorIds.includes(s.doctorId));
+  }, [slots, filterDoctorIds]);
+
+  const { uniqueDates, uniqueTimes, cellMap } = useMemo(() => {
+    const dates = new Set<string>();
+    const times = new Set<string>();
+    const map = new Map<string, Slot[]>();
+    filteredSlots.forEach((s) => {
+      dates.add(s.date);
+      times.add(s.time);
+      const key = `${s.date}_${s.time}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(s);
+    });
+    const allDates = new Set<string>();
+    slots.forEach((s) => { allDates.add(s.date); times.add(s.time); });
+    const sortedDates = Array.from(allDates).sort();
+    const sortedTimes = Array.from(times).sort();
+    return { uniqueDates: sortedDates, uniqueTimes: sortedTimes, cellMap: map };
+  }, [filteredSlots, slots]);
+
   const fetchAvailableSlots = async () => {
     if (!filters.dateFrom || !filters.dateTo) {
       setError('Vui lòng chọn khoảng thời gian.');
+      return;
+    }
+    if (filters.dateFrom < today) {
+      setError('Không thể đặt lịch trong quá khứ. Vui lòng chọn ngày từ hôm nay trở đi.');
       return;
     }
     if (filters.dateFrom > filters.dateTo) {
@@ -76,6 +111,7 @@ const [doctors, setDoctors] = useState<Doctor[]>([]);
         }));
       });
       setSlots(mapped);
+      setFilterDoctorIds([]);
       setStep(2);
     } catch {
       setError('Không thể lấy lịch trống.');
@@ -84,7 +120,6 @@ const [doctors, setDoctors] = useState<Doctor[]>([]);
     }
   };
 
-  // Handle form field changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -103,7 +138,7 @@ const [doctors, setDoctors] = useState<Doctor[]>([]);
         doctor_id: formData.doctorId,
         reason: formData.reason,
       });
-      setSuccess('Đặt lịch khám thành công!');
+      setSuccess('Yêu cầu đặt lịch đã được gửi. Vui lòng chờ nhân viên xác nhận.');
       setFormData({ date: '', time: '', doctorId: null, reason: '' });
       setStep(4);
     } catch {
@@ -118,12 +153,27 @@ const [doctors, setDoctors] = useState<Doctor[]>([]);
       setFormData({
         date: selectedSlot.date,
         time: selectedSlot.time,
-        doctorId: selectedSlot.doctorId, // or doctorId from selectedSlot if available
-        reason: formData.reason, // keep existing reason
+        doctorId: selectedSlot.doctorId,
+        reason: formData.reason,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSlot]);
+
+  const formatDateLabel = (d: string) => {
+    const dt = new Date(d);
+    const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    const dd = String(dt.getDate()).padStart(2, '0');
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    return `${days[dt.getDay()]} ${dd}/${mm}`;
+  };
+
+  const formatDate = (d: string) => {
+    const dt = new Date(d);
+    const dd = String(dt.getDate()).padStart(2, '0');
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    return `${dd}/${mm}/${dt.getFullYear()}`;
+  };
 
   return (
     <div className="appointment-page">
@@ -131,7 +181,6 @@ const [doctors, setDoctors] = useState<Doctor[]>([]);
       {error && <p className="error-message">{error}</p>}
       {success && <p className="success-message">{success}</p>}
 
-      {/* Step 1: Filters */}
       {step === 1 && (
         <div className="filter-section">
           <div className="form-group">
@@ -150,139 +199,129 @@ const [doctors, setDoctors] = useState<Doctor[]>([]);
           <div className="form-group">
             <label>Khoảng thời gian</label>
             <div className="date-range">
-              <input
-                type="date"
-                name="dateFrom"
-                value={filters.dateFrom}
-                onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
-              />
-              <input
-                type="date"
-                name="dateTo"
-                value={filters.dateTo}
-                onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
-              />
+              <input type="date" name="dateFrom" min={today} value={filters.dateFrom}
+                onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })} />
+              <input type="date" name="dateTo" min={filters.dateFrom || today} value={filters.dateTo}
+                onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })} />
             </div>
           </div>
 
-          <div className="form-group">
-            <label>Bác sĩ mong muốn (Tùy chọn)</label>
-            <select
-              name="doctorId"
-              value={filters.doctorId ?? ''}
-              onChange={(e) => {
-                const value = e.target.value;
-                setFilters({
-                  ...filters,
-                  doctorId: value === '' ? null : parseInt(value, 10),
-                });
-              }}
-            >
-              <option key="any" value="">Bất kỳ</option>
-              {doctors.map((doc) => (
-                <option key={doc.doctor_id} value={doc.doctor_id}>
-                  {doc.doctor_name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <button onClick={fetchAvailableSlots} disabled={loading}>
+          <button className="search-btn" onClick={fetchAvailableSlots} disabled={loading}>
             {loading ? 'Đang tìm kiếm...' : 'Tìm lịch trống'}
           </button>
         </div>
       )}
 
-      {/* Step 2: Available Slots */}
       {step === 2 && (
         <div className="slots-section">
-          <h2>Lịch trống khả dụng</h2>
-
-          {/* Checkbox to toggle filter by doctor */}
-          <div className="form-group">
-            <label>
-              <input
-                type="checkbox"
-                checked={filterByDoctor}
-                onChange={(e) => setFilterByDoctor(e.target.checked)}
-                disabled={!filters.doctorId} // disable if no doctor selected
-              />
-              Chỉ hiển thị lịch có bác sĩ mong muốn
-            </label>
+          <div className="slots-header">
+            <h2>Lịch trống khả dụng</h2>
+            <div className="doctor-filter-wrapper">
+              <button className="doctor-filter-btn" onClick={() => setShowDoctorFilter((v) => !v)}>
+                Lọc bác sĩ {filterDoctorIds.length > 0 ? `(${filterDoctorIds.length})` : ''}
+              </button>
+              {showDoctorFilter && (
+                <div className="doctor-filter-dropdown">
+                  <label className="doctor-filter-item">
+                    <input type="checkbox" checked={filterDoctorIds.length === 0}
+                      onChange={() => setFilterDoctorIds([])} />
+                    Tất cả bác sĩ
+                  </label>
+                  {slotDoctors.map((doc) => (
+                    <label className="doctor-filter-item" key={doc.id}>
+                      <input type="checkbox" checked={filterDoctorIds.includes(doc.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) setFilterDoctorIds((p) => [...p, doc.id]);
+                          else setFilterDoctorIds((p) => p.filter((id) => id !== doc.id));
+                        }} />
+                      {doc.name}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          {slots.length === 0 ? (
+          {uniqueDates.length === 0 ? (
             <p>Không có lịch trống nào cho bộ lọc đã chọn.</p>
           ) : (
-            // Filter slots based on filterByDoctor toggle
-            slots
-              .filter((slot) =>
-                filterByDoctor && filters.doctorId
-                  ? slot.doctorId === filters.doctorId
-                  : true
-              )
-              .map((slot) => (
-                <div
-                  key={slot.id}
-                  className="slot-card"
-                  onClick={() => {
-                    setSelectedSlot(slot);
-                    setStep(3);
-                  }}
-                >
-                  <p>
-                    <strong>{slot.time}</strong> ngày {slot.date}
-                  </p>
-                  <p>Bác sĩ: {slot.doctorName}</p>
-                </div>
-              ))
+            <div className="time-grid-wrapper">
+              <table className="time-grid">
+                <thead>
+                  <tr>
+                    <th className="time-grid-corner">Ngày</th>
+                    {uniqueTimes.map((t) => (
+                      <th key={t} className="time-grid-th">{t}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {uniqueDates.map((date) => (
+                    <tr key={date}>
+                      <td className="time-grid-date">{formatDateLabel(date)}</td>
+                      {uniqueTimes.map((time) => {
+                        const key = `${date}_${time}`;
+                        const available = cellMap.get(key);
+                        const isAvailable = available && available.length > 0;
+                        const isPopupOpen = cellPopup?.date === date && cellPopup?.time === time;
+                        return (
+                          <td key={key}
+                            className={`time-grid-cell ${isAvailable ? 'cell-available' : 'cell-unavailable'}`}
+                            onClick={() => {
+                              if (isAvailable) setCellPopup(isPopupOpen ? null : { date, time });
+                            }}
+                          >
+                            {isAvailable && <span className="cell-count">{available.length}</span>}
+                            {isPopupOpen && available && (
+                              <div className="cell-doctor-popup" onClick={(e) => e.stopPropagation()}>
+                                <div className="cell-popup-title">Chọn bác sĩ</div>
+                                {available.map((s) => (
+                                  <div key={s.id} className="cell-popup-item"
+                                    onClick={() => { setSelectedSlot(s); setCellPopup(null); setStep(3); }}>
+                                    {s.doctorName}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
-          <button onClick={() => setStep(1)}>← Quay lại bộ lọc</button>
+          <button onClick={() => { setStep(1); setCellPopup(null); }}>← Quay lại bộ lọc</button>
         </div>
       )}
 
-      {/* Step 3: Confirm Appointment */}
       {step === 3 && selectedSlot && (
         <div className="confirmation-section">
           <h2>Xác nhận lịch khám</h2>
-          <p>
-            <strong>Ngày:</strong> {selectedSlot.date}
-          </p>
-          <p>
-            <strong>Giờ:</strong> {selectedSlot.time}
-          </p>
-          <p>
-            <strong>Bác sĩ:</strong> {selectedSlot.doctorName}
-          </p>
+          <p><strong>Ngày:</strong> {formatDate(selectedSlot.date)}</p>
+          <p><strong>Giờ:</strong> {selectedSlot.time}</p>
+          <p><strong>Bác sĩ:</strong> {selectedSlot.doctorName}</p>
           <div className="form-group">
             <label>Lý do khám bệnh</label>
-            <textarea
-              name="reason"
-              value={formData.reason}
-              onChange={handleChange}
-              required
-            />
+            <textarea name="reason" value={formData.reason} onChange={handleChange} required />
           </div>
           <button onClick={handleSubmit} disabled={loading}>
             {loading ? 'Đang đặt lịch...' : 'Xác nhận đặt lịch'}
           </button>
-          <button onClick={() => setStep(2)}>← Quay lại danh sách lịch</button>
+          <button onClick={() => setStep(2)}>← Quay lại lịch</button>
         </div>
       )}
 
-      {/* Step 4: Success Message */}
       {step === 4 && success && (
         <div className="success-message">
-          <h2>✅ Đã đặt lịch khám!</h2>
+          <h2>Đã đặt lịch khám!</h2>
           <p>{success}</p>
-          <button
-            onClick={() => {
-              setStep(1);
-              setSelectedSlot(null);
-              setFormData({ date: '', time: '', doctorId: null, reason: '' });
-              setSuccess('');
-            }}
-          >
+          <button onClick={() => {
+            setStep(1); setSelectedSlot(null);
+            setFormData({ date: '', time: '', doctorId: null, reason: '' });
+            setSuccess('');
+          }}>
             Đặt lịch khám khác
           </button>
         </div>

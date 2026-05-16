@@ -274,7 +274,7 @@ const ScheduleAppointment: React.FC = () => {
           
           <div className="appointment-info">
             <p><strong>Bệnh nhân:</strong> {patients.find(p => p.patient_id === formData.patientId)?.full_name}</p>
-            <p><strong>Ngày:</strong> {formData.date}</p>
+            <p><strong>Ngày:</strong> {formData.date ? (() => { const dt = new Date(formData.date); return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`; })() : ''}</p>
             {formData.doctorId && (
               <p><strong>Bác sĩ ưu tiên:</strong> {doctors.find(d => d.doctor_id === formData.doctorId)?.doctor_name}</p>
             )}
@@ -324,7 +324,7 @@ const ScheduleAppointment: React.FC = () => {
           <div className="confirmation-details">
             <p><strong>Bệnh nhân:</strong> {patients.find(p => p.patient_id === formData.patientId)?.full_name}</p>
             <p><strong>Bác sĩ:</strong> {doctors.find(d => d.doctor_id === formData.doctorId)?.doctor_name}</p>
-            <p><strong>Ngày:</strong> {formData.date}</p>
+            <p><strong>Ngày:</strong> {formData.date ? (() => { const dt = new Date(formData.date); return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`; })() : ''}</p>
             <p><strong>Giờ:</strong> {formData.time}</p>
           </div>
 

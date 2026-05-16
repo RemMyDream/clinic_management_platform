@@ -1,0 +1,45 @@
+Chỗ đặt lịch khám của bệnh nhân vẫn đang là mm/dd/yyyy
+
+    )
+    ^
+  File "C:\Users\Chien\anaconda3\Lib\site-packages\sqlalchemy\engine\base.py", line 1637, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\Users\Chien\anaconda3\Lib\site-packages\sqlalchemy\engine\base.py", line 1842, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chien\anaconda3\Lib\site-packages\sqlalchemy\engine\base.py", line 1982, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chien\anaconda3\Lib\site-packages\sqlalchemy\engine\base.py", line 2351, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Chien\anaconda3\Lib\site-packages\sqlalchemy\engine\base.py", line 1963, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Chien\anaconda3\Lib\site-packages\sqlalchemy\engine\default.py", line 943, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.DataError: (psycopg2.errors.InvalidTextRepresentation) invalid input value for enum appointmentstatus: "PENDING"
+LINE 3: ...026-05-21'::date AND (appointments.status NOT IN ('PENDING',...
+                                                             ^
+
+[SQL: SELECT appointments.appointment_id AS appointments_appointment_id, appointments.patient_id AS appointments_patient_id, appointments.doctor_id AS appointments_doctor_id, appointments.service AS appointments_service, appointments.appointment_day AS appointments_appointment_day, appointments.appointment_time AS appointments_appointment_time, appointments.status AS appointments_status, appointments.reason AS appointments_reason, appointments.re_examination_date AS appointments_re_examination_date, appointments.re_examination_time AS appointments_re_examination_time, appointments.issue AS appointments_issue 
+FROM appointments 
+WHERE appointments.appointment_day = %(appointment_day_1)s AND (appointments.status NOT IN (%(status_1_1)s, %(status_1_2)s))]
+[parameters: {'appointment_day_1': datetime.date(2026, 5, 21), 'status_1_1': 'PENDING', 'status_1_2': 'CANCELED'}]
+(Background on this error at: https://sqlalche.me/e/20/9h9h)

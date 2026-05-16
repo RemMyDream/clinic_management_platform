@@ -130,7 +130,11 @@ const MedicalHistory = () => {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString();
+    const d = new Date(dateString);
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
   };
 
   const parsePrescription = (prescriptionJson: string) => {
@@ -184,7 +188,7 @@ const MedicalHistory = () => {
         </head>
         <body>
           <h1>Báo cáo lịch sử bệnh án</h1>
-          <p><strong>Xuất ngày:</strong> ${new Date().toLocaleDateString()}</p>
+          <p><strong>Xuất ngày:</strong> ${formatDate(new Date().toISOString().split('T')[0])}</p>
           ${filteredReports.map(report => `
             <div class="report">
               <div class="header">Báo cáo #${report.record_id} - ${formatDate(report.in_day)}</div>
@@ -219,7 +223,7 @@ const MedicalHistory = () => {
               </div>
               <div className={styles.timelineContent}>
                 <div className={styles.timelineHeader}>
-                  <h4>Report #{report.record_id}</h4>
+                  <h4>Báo cáo #{report.record_id}</h4>
                   <span className={styles.timelineDate}>{formatDate(report.in_day)}</span>
                 </div>
                 <div className={styles.timelineBody}>
@@ -230,12 +234,21 @@ const MedicalHistory = () => {
                     <p><strong>Ghi chú:</strong> {report.doctor_notes}</p>
                   )}
                 </div>
-                <button 
-                  className={styles.viewDetailsButton}
-                  onClick={() => setSelectedReport(report)}
-                >
-                  Xem chi tiết
-                </button>
+                <div className={styles.timelineFooter}>
+                  <div className={styles.statusBadge}>
+                    {report.out_day && report.out_day !== '' ? (
+                      <span className={styles.completed}>Hoàn thành</span>
+                    ) : (
+                      <span className={styles.active}>Đang điều trị</span>
+                    )}
+                  </div>
+                  <button
+                    className={styles.viewDetailsButton}
+                    onClick={() => setSelectedReport(report)}
+                  >
+                    Xem chi tiết
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -335,13 +348,13 @@ const MedicalHistory = () => {
                 className={`${styles.toggleButton} ${viewMode === 'list' ? styles.active : ''}`}
                 onClick={() => setViewMode('list')}
               >
-                📋 Dạng danh sách
+                DẠNG DANH SÁCH
               </button>
               <button
                 className={`${styles.toggleButton} ${viewMode === 'timeline' ? styles.active : ''}`}
                 onClick={() => setViewMode('timeline')}
               >
-                🕒 Dạng thời gian
+                DẠNG THỜI GIAN
               </button>
             </div>
           </div>

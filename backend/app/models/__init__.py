@@ -8,6 +8,7 @@ from .medical_report import MedicalReport
 from .prescription import Prescription
 from .otc_medication import OTCMedicationRecord
 from .chat_message import ChatMessage
+from .vn_province import VnProvince, VnDistrict
 
 __all__ = [
     "User",
@@ -21,4 +22,6 @@ __all__ = [
     "Prescription",
     "OTCMedicationRecord",
     "ChatMessage",
+    "VnProvince",
+    "VnDistrict",
 ]

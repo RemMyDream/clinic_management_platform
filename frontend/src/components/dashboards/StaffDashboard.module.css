@@ -353,6 +353,24 @@
   text-align: center;
 }
 
+.confirmBtn {
+  padding: 6px 16px;
+  background: linear-gradient(135deg, #1a7f42, #15803d);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.confirmBtn:hover {
+  background: linear-gradient(135deg, #15803d, #0d6630);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(26, 127, 66, 0.3);
+}
+
 .emptyState {
   background: var(--white);
   border-radius: var(--radius-lg);

@@ -6,7 +6,7 @@ from datetime import date, time, datetime
 class AppointmentBase(BaseModel):
     patient_id: int
     doctor_id: int
-    service: Optional[str] = "General Consultation"
+    service: Optional[str] = "Khám tổng quát"
     appointment_time: time
     appointment_day: date
     reason: Optional[str] = None
@@ -32,7 +32,7 @@ class AppointmentSchema(AppointmentBase):
     appointment_id: int
     patient_id: int
     doctor_id: int
-    status: Optional[str] = "Scheduled"
+    status: Optional[str] = "Pending"
     re_examination_date: Optional[date] = None
     re_examination_time: Optional[time] = None
     issue: Optional[str] = None

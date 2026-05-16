@@ -55,7 +55,8 @@ class PatientService:
             raise HTTPException(status_code=404, detail="Patient not found")
 
         role = current_user.role.value
-        if role not in [UserRole.ADMIN.value, UserRole.CLINIC_STAFF.value, UserRole.DOCTOR.value]:
+        is_own_profile = role == UserRole.PATIENT.value and patient.patient_id == current_user.user_id
+        if not is_own_profile and role not in [UserRole.ADMIN.value, UserRole.CLINIC_STAFF.value, UserRole.DOCTOR.value]:
             raise HTTPException(status_code=403, detail="Not enough permissions")
 
         if role == UserRole.CLINIC_STAFF.value:

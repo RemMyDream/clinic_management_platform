@@ -7,6 +7,8 @@ from ..database import Base
 
 
 class AppointmentStatus(str, enum.Enum):
+    PENDING = "Pending"
+    CONFIRMED = "Confirmed"
     SCHEDULED = "Scheduled"
     COMPLETED = "Completed"
     CANCELED = "Canceled"
@@ -19,10 +21,10 @@ class Appointment(Base):
     appointment_id = Column(Integer, primary_key=True, autoincrement=True)
     patient_id = Column(Integer, ForeignKey("patients.patient_id", ondelete="CASCADE"), nullable=False)
     doctor_id = Column(Integer, ForeignKey("doctors.doctor_id", ondelete="CASCADE"), nullable=False)
-    service = Column(String(255), default="General Consultation")
+    service = Column(String(255), default="Khám tổng quát")
     appointment_day = Column(Date, nullable=False)
     appointment_time = Column(Time, nullable=False)
-    status = Column(Enum(AppointmentStatus), default=AppointmentStatus.SCHEDULED, nullable=False)
+    status = Column(Enum(AppointmentStatus), default=AppointmentStatus.PENDING, nullable=False)
     reason = Column(Text)
     re_examination_date = Column(Date)
     re_examination_time = Column(Time)

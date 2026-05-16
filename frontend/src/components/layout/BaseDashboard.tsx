@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { UserRole } from '../../types/UserType';
-import './BaseDashboard.css'; // Assuming you have a CSS file for styles
-
-import { Outlet } from 'react-router-dom';
+import { userApi } from '../../services/api';
 import { toast } from 'react-toastify';
+import './BaseDashboard.css';
 
 type Props = {
   role: UserRole;
@@ -14,8 +13,18 @@ type Props = {
 
 const BaseDashboard: React.FC<Props> = ({ role, children }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userName, setUserName] = useState('');
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    userApi.getMe()
+      .then((res) => {
+        const name = res.data.full_name || res.data.doctor_name || res.data.username || '';
+        setUserName(name);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -64,7 +73,7 @@ const BaseDashboard: React.FC<Props> = ({ role, children }) => {
               className="logo"
             />
             <h1 className="title">
-              Clinic Management System
+              Nền tảng quản lý phòng khám
             </h1>
           </div>
 
@@ -75,8 +84,8 @@ const BaseDashboard: React.FC<Props> = ({ role, children }) => {
               onClick={() => setMenuOpen((open) => !open)}
               aria-label="Account menu"
             >
-              <span className="account-avatar">A</span>
-              <span className="account-label">Account</span>
+              <span className="account-avatar">{userName ? userName.charAt(0).toUpperCase() : 'A'}</span>
+              <span className="account-label">{userName || 'Tài khoản'}</span>
               <svg
                 className="chevron"
                 fill="none"

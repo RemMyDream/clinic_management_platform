@@ -87,6 +87,24 @@ def cancel_appointment(
     return AppointmentService.cancel(db, appointment_id, current_user)
 
 
+@router.post("/{appointment_id}/confirm", response_model=AppointmentSchema)
+def confirm_appointment(
+    appointment_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    return AppointmentService.confirm(db, appointment_id, current_user)
+
+
+@router.post("/{appointment_id}/accept", response_model=AppointmentSchema)
+def accept_appointment(
+    appointment_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    return AppointmentService.accept(db, appointment_id, current_user)
+
+
 @router.post("/{appointment_id}/complete", response_model=AppointmentSchema)
 def complete_appointment(
     appointment_id: int,

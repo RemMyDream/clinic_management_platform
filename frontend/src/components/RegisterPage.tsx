@@ -3,7 +3,6 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../services/api';
-
 import styles from './RegisterPage.module.css';
 
 const RegisterPage: React.FC = () => {
@@ -29,10 +28,19 @@ const RegisterPage: React.FC = () => {
             });
 
             if (response.status === 201 || response.status === 200) {
-                toast.success('Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.');
-                setTimeout(() => {
-                    navigate('/login');
-                }, 1000);
+                toast.success('Đăng ký thành công!');
+                const formData = new URLSearchParams();
+                formData.append('username', mail);
+                formData.append('password', password);
+                const loginRes = await api.post('/auth/token', formData, {
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                });
+                if (loginRes.data.access_token) {
+                    localStorage.setItem('accessToken', loginRes.data.access_token);
+                    localStorage.setItem('role', loginRes.data.role);
+                    localStorage.setItem('user_id', loginRes.data.user_id);
+                    navigate('/complete-profile');
+                }
             }
         } catch (err: any) {
             if (axios.isAxiosError(err) && err.response) {

@@ -11,7 +11,7 @@ from .database import create_db_and_tables
 from .routers import (
     auth, users, chat, patients, appointments,
     doctors, hospitals, password, reports,
-    staff, prescriptions, otc_medications,
+    staff, prescriptions, otc_medications, provinces,
 )
 
 logger = logging.getLogger(__name__)
@@ -20,6 +20,20 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_db_and_tables()
+    from .database import SessionLocal, engine
+    from .seed_provinces import seed_provinces
+    from sqlalchemy import text
+    with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+        try:
+            conn.execute(text("ALTER TYPE appointmentstatus ADD VALUE IF NOT EXISTS 'Pending'"))
+            conn.execute(text("ALTER TYPE appointmentstatus ADD VALUE IF NOT EXISTS 'Confirmed'"))
+        except Exception:
+            pass
+    db = SessionLocal()
+    try:
+        seed_provinces(db)
+    finally:
+        db.close()
     yield
 
 
@@ -79,6 +93,7 @@ app.include_router(prescriptions.router,   prefix="/prescriptions",   tags=["Pre
 app.include_router(otc_medications.router, prefix="/otc_medications", tags=["OTC Medications"])
 app.include_router(chat.router,            prefix="/chat",            tags=["Chat"])
 app.include_router(password.router,        prefix="/password",        tags=["Password"])
+app.include_router(provinces.router,       prefix="/provinces",       tags=["Provinces"])
 
 
 @app.get("/", tags=["Root"])
