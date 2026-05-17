@@ -25,8 +25,8 @@ async def lifespan(app: FastAPI):
     from sqlalchemy import text
     with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
         try:
-            conn.execute(text("ALTER TYPE appointmentstatus ADD VALUE IF NOT EXISTS 'Pending'"))
-            conn.execute(text("ALTER TYPE appointmentstatus ADD VALUE IF NOT EXISTS 'Confirmed'"))
+            conn.execute(text("ALTER TYPE appointmentstatus ADD VALUE IF NOT EXISTS 'PENDING'"))
+            conn.execute(text("ALTER TYPE appointmentstatus ADD VALUE IF NOT EXISTS 'CONFIRMED'"))
         except Exception:
             pass
     db = SessionLocal()
