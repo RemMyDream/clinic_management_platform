@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     GOOGLE_API_KEY: str
+    GEMINI_MODEL: str = "gemini-2.5-flash"
 
     # Email settings
     MAIL_SERVER: Optional[str] = MAIL_SERVER

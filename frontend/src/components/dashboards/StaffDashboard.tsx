@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import ChatbotWidget from '../Chatbot/ChatbotWidget';
 import styles from './StaffDashboard.module.css';
 import { appointmentApi, patientApi, doctorApi } from '../../services/api';
 
@@ -188,32 +189,51 @@ const StaffDashboard = () => {
         </div>
       )}
 
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Lịch hôm nay</h3>
-        {appointments.length === 0 ? (
-          <div className={styles.emptyState}><p>Không có cuộc hẹn nào được lên lịch cho hôm nay</p></div>
-        ) : (
-          <div className={styles.appointmentsTable}>
-            <div className={styles.tableHeader}>
-              <div>Thời gian</div>
-              <div>Bệnh nhân</div>
-              <div>Bác sĩ</div>
-              <div>Lý do</div>
-              <div>Trạng thái</div>
-            </div>
-            {appointments.map((a) => (
-              <div key={a.appointment_id} className={styles.tableRow}>
-                <div className={styles.timeCell}>{a.appointment_time}</div>
-                <div>{a.patientName}</div>
-                <div>{a.doctorName}</div>
-                <div className={styles.reasonCell}>{a.reason}</div>
-                <div>
-                  <span className={styles.statusPending}>{STATUS_LABEL[a.status] || a.status}</span>
-                </div>
+      <div className={styles.gridLayout}>
+        <div className={styles.section}>
+          <h3 className={styles.sectionTitle}>Lịch hôm nay</h3>
+          {appointments.length === 0 ? (
+            <div className={styles.emptyState}><p>Không có cuộc hẹn nào được lên lịch cho hôm nay</p></div>
+          ) : (
+            <div className={styles.appointmentsTable}>
+              <div className={styles.tableHeader}>
+                <div>Thời gian</div>
+                <div>Bệnh nhân</div>
+                <div>Bác sĩ</div>
+                <div>Lý do</div>
+                <div>Trạng thái</div>
               </div>
-            ))}
+              {appointments.map((a) => (
+                <div key={a.appointment_id} className={styles.tableRow}>
+                  <div className={styles.timeCell}>{a.appointment_time}</div>
+                  <div>{a.patientName}</div>
+                  <div>{a.doctorName}</div>
+                  <div className={styles.reasonCell}>{a.reason}</div>
+                  <div>
+                    <span className={styles.statusPending}>{STATUS_LABEL[a.status] || a.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className={styles.section}>
+          <h3 className={styles.sectionTitle}>🤖 Trợ lý AI y tế</h3>
+          <div className={styles.chatCard}>
+            <p className={styles.chatDescription}>
+              Trò chuyện với trợ lý AI phòng khám để được hỗ trợ thông tin y khoa, quy trình vận hành và tra cứu EMR bệnh nhân.
+            </p>
+            <div className={styles.flexGrow}>
+              <ChatbotWidget
+                userRole="CLINIC_STAFF"
+                isAuthenticated={true}
+                position="inline"
+                placeholder="Hỏi về quy trình phòng khám hoặc nhập ID bệnh nhân..."
+              />
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

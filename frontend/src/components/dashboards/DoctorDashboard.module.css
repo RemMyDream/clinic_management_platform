@@ -395,6 +395,43 @@
   margin: 0;
 }
 
+/* Grid Layout for appointments and chat */
+.gridLayout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-5);
+  margin-bottom: var(--spacing-5);
+}
+
+/* Chat Card */
+.chatCard {
+  background: var(--white);
+  padding: var(--spacing-5);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--secondary-200);
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  transition: all var(--transition-fast) ease;
+}
+
+.chatCard:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.chatDescription {
+  color: var(--secondary-600);
+  margin-bottom: var(--spacing-4);
+  font-size: var(--font-size-sm);
+  text-align: left;
+}
+
+.flexGrow {
+  flex: 1;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
@@ -407,6 +444,11 @@
   }
   
   .actionsGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+  }
+
+  .gridLayout {
     grid-template-columns: 1fr;
     gap: var(--spacing-4);
   }

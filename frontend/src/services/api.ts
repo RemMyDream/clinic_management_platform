@@ -110,4 +110,6 @@ export const chatApi = {
   sendPublic: (message: string) => api.post('/chat/public', { message }),
   sendPatient: (message: string) => api.post('/chat/patient', { message }),
   sendStaff: (patient_id: number, message: string) => api.post('/chat/send', { patient_id, message }),
+  getHistory: (skip = 0, limit = 50) => api.get('/chat/history', { params: { skip, limit } }),
 };
+
