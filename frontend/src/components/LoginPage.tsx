@@ -71,10 +71,7 @@ const LoginPage: React.FC = () => {
             <div className={styles.leftPanel}>
                 <div className={styles.brandContent}>
                     <div className={styles.brandIcon}>
-                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                            <rect width="48" height="48" rx="12" fill="white" fillOpacity="0.2"/>
-                            <path d="M24 12v24M12 24h24" stroke="white" strokeWidth="3" strokeLinecap="round"/>
-                        </svg>
+                        <img src="/logo.png" alt="Logo phòng khám" className={styles.brandLogo} />
                     </div>
                     <h1 className={styles.brandTitle}>Nền tảng quản lý phòng khám</h1>
                     <p className={styles.brandSub}>Quản lý lịch hẹn, hồ sơ bệnh nhân và hoạt động y tế một cách chuyên nghiệp, hiệu quả.</p>

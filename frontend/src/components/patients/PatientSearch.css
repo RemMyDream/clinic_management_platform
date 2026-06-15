@@ -13,13 +13,14 @@
 .search-header h2 {
   margin: 0 0 10px 0;
   color: #2c3e50;
-  font-size: 1.8rem;
+  font-size: 2.3rem;
 }
 
 .role-info {
   color: #666;
   font-style: italic;
   margin: 0;
+  font-size: 1.1rem;
 }
 
 /* Search Form Styles */
@@ -45,20 +46,23 @@
 
 .form-group label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   font-weight: 600;
   color: #333;
+  font-size: 1.05rem;
 }
 
 .search-input,
 .select-input,
 .form-group input,
 .form-group select {
+  box-sizing: border-box;
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-family: inherit;
   transition: border-color 0.3s ease;
 }
 
@@ -94,11 +98,12 @@
   background: #3498db;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
+  padding: 11px 22px;
+  border-radius: 8px;
   cursor: pointer;
   margin-bottom: 20px;
-  font-size: 14px;
+  font-size: 1.05rem;
+  font-weight: 600;
   transition: background-color 0.3s ease;
 }
 
@@ -121,11 +126,11 @@
 
 .search-btn,
 .clear-btn {
-  padding: 12px 24px;
+  padding: 13px 28px;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 1.05rem;
   font-weight: 600;
   transition: all 0.3s ease;
 }
@@ -188,12 +193,13 @@
 .results-header h3 {
   margin: 0 0 5px 0;
   color: #2c3e50;
+  font-size: 1.4rem;
 }
 
 .results-header p {
   margin: 0;
   color: #666;
-  font-size: 14px;
+  font-size: 1rem;
 }
 
 .no-results {
@@ -219,15 +225,17 @@
 
 .results-table th,
 .results-table td {
-  padding: 12px 15px;
+  padding: 15px 18px;
   text-align: left;
   border-bottom: 1px solid #eee;
+  font-size: 1.02rem;
 }
 
 .results-table th {
   background: #f8f9fa;
-  font-weight: 600;
+  font-weight: 700;
   color: #333;
+  font-size: 1.02rem;
   position: sticky;
   top: 0;
 }
@@ -250,10 +258,11 @@
   background: #3498db;
   color: white;
   border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
+  padding: 8px 14px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 0.92rem;
+  font-weight: 600;
   transition: background-color 0.3s ease;
 }
 
@@ -274,12 +283,13 @@
   background: #27ae60;
   color: white;
   border: none;
-  padding: 6px 10px;
-  border-radius: 4px;
+  padding: 8px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 0.88rem;
+  font-weight: 600;
   transition: background-color 0.3s ease;
-  min-width: 65px;
+  min-width: 75px;
 }
 
 .appointment-btn:hover {
@@ -290,12 +300,13 @@
   background: #e67e22;
   color: white;
   border: none;
-  padding: 6px 10px;
-  border-radius: 4px;
+  padding: 8px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 0.88rem;
+  font-weight: 600;
   transition: background-color 0.3s ease;
-  min-width: 65px;
+  min-width: 75px;
 }
 
 .emr-btn:hover {
@@ -306,12 +317,13 @@
   background: #9b59b6;
   color: white;
   border: none;
-  padding: 6px 8px;
-  border-radius: 4px;
+  padding: 8px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 0.88rem;
+  font-weight: 600;
   transition: background-color 0.3s ease;
-  min-width: 65px;
+  min-width: 75px;
 }
 
 .create-emr-btn:hover {
@@ -346,32 +358,36 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 25px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #eee;
+  padding: 22px 26px;
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  border-bottom: none;
 }
 
 .modal-header h3 {
   margin: 0;
-  color: #2c3e50;
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 700;
 }
 
 .close-btn {
-  background: none;
+  background: rgba(255, 255, 255, 0.2);
   border: none;
-  font-size: 24px;
+  font-size: 22px;
   cursor: pointer;
-  color: #666;
+  color: #ffffff;
   padding: 0;
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background 0.2s;
 }
 
 .close-btn:hover {
-  color: #333;
+  background: rgba(255, 255, 255, 0.35);
 }
 
 .modal-body {
@@ -389,12 +405,13 @@
 .detail-row {
   display: flex;
   gap: 10px;
-  padding: 8px 0;
+  padding: 11px 0;
   border-bottom: 1px solid #f0f0f0;
+  font-size: 1.05rem;
 }
 
 .detail-row strong {
-  min-width: 140px;
+  min-width: 150px;
   color: #333;
 }
 

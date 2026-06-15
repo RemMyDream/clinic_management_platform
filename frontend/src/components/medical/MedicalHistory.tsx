@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 import styles from './MedicalHistory.module.css';
 import { medicalReportApi } from '../../services/api';
 
@@ -48,7 +51,6 @@ const MedicalHistory = () => {
     dateTo: '',
     status: 'all'
   });
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchMedicalHistory();
@@ -114,10 +116,6 @@ const MedicalHistory = () => {
       dateTo: '',
       status: 'all'
     });
-  };
-
-  const handleBackToDashboard = () => {
-    navigate('/dashboard');
   };
 
   const handleReportSelect = (report: MedicalReport) => {
@@ -260,9 +258,6 @@ const MedicalHistory = () => {
   return (
     <div className={styles.medicalHistoryContainer}>
       <div className={styles.header}>
-        <button className={styles.backButton} onClick={handleBackToDashboard}>
-          ← Quay lại Dashboard
-        </button>
         <h2>Lịch sử bệnh án</h2>
         <div className={styles.headerActions}>
           <button className={styles.exportButton} onClick={exportMedicalHistory}>
@@ -301,23 +296,25 @@ const MedicalHistory = () => {
               </div>
               <div className={styles.filterGroup}>
                 <label>Từ ngày:</label>
-                <input
-                  type="date"
-                  name="dateFrom"
-                  value={searchFilters.dateFrom}
-                  onChange={handleFilterChange}
-                  className={styles.filterInput}
-                />
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    value={searchFilters.dateFrom ? dayjs(searchFilters.dateFrom) : null}
+                    onChange={(v) => setSearchFilters(prev => ({ ...prev, dateFrom: v ? v.format('YYYY-MM-DD') : '' }))}
+                    format="DD/MM/YYYY"
+                    slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                  />
+                </LocalizationProvider>
               </div>
               <div className={styles.filterGroup}>
                 <label>Đến ngày:</label>
-                <input
-                  type="date"
-                  name="dateTo"
-                  value={searchFilters.dateTo}
-                  onChange={handleFilterChange}
-                  className={styles.filterInput}
-                />
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    value={searchFilters.dateTo ? dayjs(searchFilters.dateTo) : null}
+                    onChange={(v) => setSearchFilters(prev => ({ ...prev, dateTo: v ? v.format('YYYY-MM-DD') : '' }))}
+                    format="DD/MM/YYYY"
+                    slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                  />
+                </LocalizationProvider>
               </div>
               <div className={styles.filterGroup}>
                 <label>Trạng thái:</label>
@@ -345,13 +342,13 @@ const MedicalHistory = () => {
             <h3>Chế độ xem</h3>
             <div className={styles.viewModeToggle}>
               <button
-                className={`${styles.toggleButton} ${viewMode === 'list' ? styles.active : ''}`}
+                className={`${styles.toggleButton} ${viewMode === 'list' ? styles.toggleActive : ''}`}
                 onClick={() => setViewMode('list')}
               >
                 DẠNG DANH SÁCH
               </button>
               <button
-                className={`${styles.toggleButton} ${viewMode === 'timeline' ? styles.active : ''}`}
+                className={`${styles.toggleButton} ${viewMode === 'timeline' ? styles.toggleActive : ''}`}
                 onClick={() => setViewMode('timeline')}
               >
                 DẠNG THỜI GIAN
@@ -429,7 +426,7 @@ const MedicalHistory = () => {
                   </div>
 
                   <div className={styles.detailsContent}>
-                    <div className={styles.section}>
+                    <div className={`${styles.section} ${styles.sectionBasic}`}>
                       <h4>Thông tin cơ bản</h4>
                       <div className={styles.infoGrid}>
                         <div className={styles.infoItem}>
@@ -444,7 +441,7 @@ const MedicalHistory = () => {
                       </div>
                     </div>
 
-                    <div className={styles.section}>
+                    <div className={`${styles.section} ${styles.sectionDiagnosis}`}>
                       <h4>Chẩn đoán & Điều trị</h4>
                       <div className={styles.infoItem}>
                         <strong>Chẩn đoán ban đầu:</strong>
@@ -464,7 +461,7 @@ const MedicalHistory = () => {
                       </div>
                     </div>
 
-                    <div className={styles.section}>
+                    <div className={`${styles.section} ${styles.sectionVitals}`}>
                       <h4>Chỉ số sinh tồn</h4>
                       <div className={styles.vitalSignsGrid}>
                         <div className={styles.vitalSign}>
@@ -486,7 +483,7 @@ const MedicalHistory = () => {
                     </div>
 
                     {selectedReport.prescription && (
-                      <div className={styles.section}>
+                      <div className={`${styles.section} ${styles.sectionPrescription}`}>
                         <h4>Đơn thuốc</h4>
                         <div className={styles.prescriptionList}>
                           {parsePrescription(selectedReport.prescription).map((med: any, index: number) => (
@@ -504,7 +501,7 @@ const MedicalHistory = () => {
                     )}
 
                     {(selectedReport.personal_history || selectedReport.family_history) && (
-                      <div className={styles.section}>
+                      <div className={`${styles.section} ${styles.sectionHistory}`}>
                         <h4>Tiền sử bệnh nhân</h4>
                         {selectedReport.personal_history && (
                           <div className={styles.infoItem}>

@@ -343,16 +343,65 @@
 .filterGroup label {
   font-weight: 600;
   color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
+  font-size: 1.05rem;
   text-align: left;
 }
 
 .filterInput, .filterSelect {
-  padding: 8px var(--spacing-sm);
+  box-sizing: border-box;
+  height: 40px;
+  padding: 8px 12px;
   border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-sm);
-  font-size: var(--font-size-sm);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
   transition: var(--transition-colors);
+}
+
+/* Make MUI DatePicker field match the native inputs (same font, size & height) */
+.filterGroup :global(.MuiFormControl-root) {
+  width: 100%;
+  margin: 0;
+}
+
+.filterGroup :global(.MuiInputBase-root.MuiOutlinedInput-root) {
+  box-sizing: border-box;
+  height: 40px;
+  min-height: 40px;
+  font-family: inherit;
+  font-size: 1rem;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.filterGroup :global(.MuiOutlinedInput-input) {
+  padding: 8px 12px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.filterGroup :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: var(--color-border);
+  border-width: 1px;
+}
+
+/* Calendar icon in MUI DatePicker – match the look on the booking page */
+.filterGroup :global(.MuiInputAdornment-root .MuiIconButton-root) {
+  padding: 8px;
+  margin: 0;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.54);
+  border-radius: 50%;
+}
+
+.filterGroup :global(.MuiInputAdornment-root .MuiIconButton-root:hover) {
+  background: rgba(0, 0, 0, 0.04);
+  box-shadow: none;
+}
+
+.filterGroup :global(.MuiInputAdornment-root .MuiSvgIcon-root) {
+  width: 22px;
+  height: 22px;
 }
 
 .filterInput:focus, .filterSelect:focus {
@@ -367,13 +416,16 @@
 }
 
 .clearButton {
+  box-sizing: border-box;
+  height: 40px;
   background: var(--color-gray-600);
   color: var(--color-white);
   border: none;
-  padding: 8px var(--spacing-md);
-  border-radius: var(--border-radius-sm);
+  padding: 0 18px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: var(--font-size-sm);
+  font-size: 1rem;
+  font-weight: 600;
   transition: var(--transition-colors);
 }
 
@@ -396,23 +448,34 @@
 .viewModeToggle {
   display: flex;
   gap: 0;
-  border: 2px solid var(--color-primary, #007bff);
+  border: none;
   border-radius: 10px;
   overflow: hidden;
   width: fit-content;
 }
 
 .toggleButton {
-  background: var(--color-white);
-  color: var(--color-text-secondary);
+  box-sizing: border-box;
+  width: 200px;
+  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: #2563EB;
+  color: #ffffff;
   border: none;
-  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: 0;
+  margin: 0;
+  padding: 0;
   cursor: pointer;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
   letter-spacing: 0.5px;
-  transition: var(--transition-all);
-  border-right: 2px solid var(--color-primary, #007bff);
+  text-transform: none;
+  transition: all 0.18s ease;
+  border-right: 1px solid rgba(255, 255, 255, 0.35);
 }
 
 .toggleButton:last-child {
@@ -420,12 +483,16 @@
 }
 
 .toggleButton:hover {
-  background: var(--color-background-secondary);
+  background: #1D4ED8;
 }
 
-.toggleButton.active {
-  background: var(--color-primary);
-  color: var(--color-white);
+.toggleButton.toggleActive {
+  background: #DC2626;
+  color: #ffffff;
+}
+
+.toggleButton.toggleActive:hover {
+  background: #DC2626;
 }
 
 /* Statistics Cards */
@@ -765,6 +832,78 @@
 .medDetails span {
   font-size: 14px;
   color: #495057;
+}
+
+/* ── Color-coded report detail sections ─────────────────────────── */
+.detailsContent .section {
+  position: relative;
+  padding-left: 18px;
+  border-radius: 0 10px 10px 0;
+}
+
+.detailsContent .section::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 20px;
+  width: 5px;
+  border-radius: 4px;
+}
+
+.detailsContent .section h4 {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+/* Basic info – blue */
+.sectionBasic::before { background: #2563EB; }
+.sectionBasic h4 { background: #DBEAFE; color: #1D4ED8; }
+
+/* Diagnosis & treatment – violet */
+.sectionDiagnosis::before { background: #7C3AED; }
+.sectionDiagnosis h4 { background: #EDE9FE; color: #6D28D9; }
+
+/* Vital signs – teal/green */
+.sectionVitals::before { background: #059669; }
+.sectionVitals h4 { background: #D1FAE5; color: #047857; }
+
+/* Prescription – amber */
+.sectionPrescription::before { background: #D97706; }
+.sectionPrescription h4 { background: #FEF3C7; color: #B45309; }
+
+/* Patient history – pink */
+.sectionHistory::before { background: #DB2777; }
+.sectionHistory h4 { background: #FCE7F3; color: #BE185D; }
+
+/* Tinted vital-sign cards & medication items to match their section */
+.sectionVitals .vitalSign {
+  background: #ECFDF5;
+  border-color: #A7F3D0;
+}
+
+.sectionPrescription .medicationItem {
+  background: #FFFBEB;
+  border-color: #FDE68A;
+}
+
+.sectionPrescription .medName {
+  color: #B45309;
+}
+
+/* Report list cards: colored left accent */
+.reportCard {
+  border-left: 4px solid #94a3b8;
+}
+
+.reportCard:has(.completed) {
+  border-left-color: #2563EB;
+}
+
+.reportCard:has(.active) {
+  border-left-color: #059669;
 }
 
 /* Responsive Design */

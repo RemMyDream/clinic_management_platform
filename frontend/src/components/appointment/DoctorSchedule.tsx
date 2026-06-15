@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
-import { CircularProgress, Box, Modal, Chip } from '@mui/material';
+import { CircularProgress, Box, Modal } from '@mui/material';
 import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
 import dayjs from 'dayjs';
 import { toast } from 'react-toastify';
@@ -29,13 +29,13 @@ const STATUS_LABEL: Record<string, string> = {
   'No Show': 'Vắng mặt',
 };
 
-const STATUS_COLOR: Record<string, 'default' | 'primary' | 'success' | 'error' | 'warning'> = {
-  Pending: 'warning',
-  Confirmed: 'primary',
-  Scheduled: 'success',
-  Completed: 'success',
-  Canceled: 'error',
-  'No Show': 'warning',
+const STATUS_BADGE: Record<string, string> = {
+  Pending: styles.statusWarning,
+  Confirmed: styles.statusPrimary,
+  Scheduled: styles.statusSuccess,
+  Completed: styles.statusSuccess,
+  Canceled: styles.statusError,
+  'No Show': styles.statusWarning,
 };
 
 const DoctorSchedule = () => {
@@ -184,17 +184,7 @@ const DoctorSchedule = () => {
                   <td>{appointment.patientName}</td>
                   <td>{appointment.reason}</td>
                   <td>
-                    <span
-                      style={{
-                        display: 'inline-block',
-                        padding: '4px 8px',
-                        borderRadius: '16px',
-                        fontSize: '0.8125rem',
-                        fontWeight: 500,
-                        backgroundColor: appointment.status === 'Confirmed' ? '#e3f2fd' : (appointment.status === 'Scheduled' ? '#e8f5e9' : '#f5f5f5'),
-                        color: appointment.status === 'Confirmed' ? '#1976d2' : (appointment.status === 'Scheduled' ? '#2e7d32' : '#rgba(0, 0, 0, 0.87)'),
-                      }}
-                    >
+                    <span className={`${styles.modalStatus} ${STATUS_BADGE[appointment.status] || styles.statusDefault}`}>
                       {STATUS_LABEL[appointment.status] || appointment.status}
                     </span>
                   </td>
@@ -208,45 +198,72 @@ const DoctorSchedule = () => {
 
         <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <Box className={styles.appointmentModal}>
-            <h2>Thao tác với lịch hẹn</h2>
             {selectedAppointment && (
-                <>
-                  <p><strong>Bệnh nhân:</strong> {selectedAppointment.patientName}</p>
-                  <p><strong>Ngày:</strong> {formatDate(selectedAppointment.appointment_day)}</p>
-                  <p><strong>Giờ:</strong> {selectedAppointment.appointment_time}</p>
-                  <p><strong>Trạng thái:</strong>{' '}
-                    <span
-                      style={{
-                        display: 'inline-block',
-                        padding: '4px 8px',
-                        borderRadius: '16px',
-                        fontSize: '0.8125rem',
-                        fontWeight: 500,
-                        backgroundColor: selectedAppointment.status === 'Confirmed' ? '#e3f2fd' : '#f5f5f5',
-                        color: selectedAppointment.status === 'Confirmed' ? '#1976d2' : '#rgba(0, 0, 0, 0.87)',
-                      }}
-                    >
-                      {STATUS_LABEL[selectedAppointment.status] || selectedAppointment.status}
+              <>
+                <div className={styles.modalHeader}>
+                  <span className={styles.modalHeaderIcon}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                  </span>
+                  <h2 className={styles.modalTitle}>Chi tiết lịch hẹn</h2>
+                </div>
+
+                <div className={styles.modalInfo}>
+                  <div className={styles.modalRow}>
+                    <span className={`${styles.modalIcon} ${styles.icGreen}`}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     </span>
-                  </p>
+                    <div className={styles.modalText}>
+                      <span className={styles.modalLabel}>Bệnh nhân</span>
+                      <span className={styles.modalValue}>{selectedAppointment.patientName}</span>
+                    </div>
+                  </div>
+                  <div className={styles.modalRow}>
+                    <span className={`${styles.modalIcon} ${styles.icBlue}`}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </span>
+                    <div className={styles.modalText}>
+                      <span className={styles.modalLabel}>Ngày khám</span>
+                      <span className={styles.modalValue}>{formatDate(selectedAppointment.appointment_day)}</span>
+                    </div>
+                  </div>
+                  <div className={styles.modalRow}>
+                    <span className={`${styles.modalIcon} ${styles.icViolet}`}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </span>
+                    <div className={styles.modalText}>
+                      <span className={styles.modalLabel}>Giờ khám</span>
+                      <span className={styles.modalValue}>{selectedAppointment.appointment_time}</span>
+                    </div>
+                  </div>
+                  <div className={`${styles.modalRow} ${styles.modalRowLast}`}>
+                    <span className={`${styles.modalIcon} ${styles.icBlue}`}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    </span>
+                    <div className={styles.modalText}>
+                      <span className={styles.modalLabel}>Trạng thái</span>
+                      <span className={`${styles.modalStatus} ${STATUS_BADGE[selectedAppointment.status] || styles.statusDefault}`}>
+                        {STATUS_LABEL[selectedAppointment.status] || selectedAppointment.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-                  {selectedAppointment.status === 'Confirmed' && (
-                    <Box mt={2}>
-                      <button
-                        className={styles.acceptButton}
-                        onClick={handleAccept}
-                      >
-                        Chấp nhận lịch hẹn
-                      </button>
-                    </Box>
-                  )}
+                {selectedAppointment.status === 'Confirmed' && (
+                  <div className={styles.modalActions}>
+                    <button className={styles.acceptButton} onClick={handleAccept}>
+                      Chấp nhận lịch hẹn
+                    </button>
+                  </div>
+                )}
 
-                  {error && (
-                  <Box mt={2} color="error.main">
+                {error && (
+                  <div className={styles.modalActions}>
                     <p style={{ color: 'red', margin: 0 }}>{error}</p>
-                  </Box>
-                  )}
-                </>
+                  </div>
+                )}
+              </>
             )}
           </Box>
         </Modal>

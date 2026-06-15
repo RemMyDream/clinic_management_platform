@@ -1,14 +1,17 @@
 /* DoctorSchedule - Modern calendar & schedule view */
 
 .appointmentsContainer {
-  max-width: 900px;
+  max-width: 1080px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2.5rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .appointmentsHeader {
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
   text-align: center;
@@ -16,6 +19,47 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Enlarge & center the MUI calendar (match patient view) */
+.appointmentsContainer :global(.MuiDateCalendar-root) {
+  width: 560px;
+  max-height: none;
+  height: auto;
+  margin: 0 auto 1rem;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+  padding: 16px 12px 24px;
+}
+
+.appointmentsContainer :global(.MuiDayCalendar-slideTransition) {
+  min-height: 380px;
+  overflow: visible;
+}
+
+.appointmentsContainer :global(.MuiPickersCalendarHeader-label) {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.appointmentsContainer :global(.MuiDayCalendar-weekDayLabel) {
+  width: 64px;
+  height: 44px;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.appointmentsContainer :global(.MuiPickersDay-root) {
+  width: 58px;
+  height: 58px;
+  font-size: 1.25rem;
+  margin: 3px;
+}
+
+.appointmentsContainer :global(.MuiDayCalendar-weekContainer),
+.appointmentsContainer :global(.MuiDayCalendar-header) {
+  justify-content: space-around;
 }
 
 .loadingSpinner {
@@ -39,6 +83,7 @@
 
 .appointmentsTable {
   width: 100%;
+  align-self: stretch;
   border-collapse: separate;
   border-spacing: 0;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
@@ -50,7 +95,7 @@
 
 .appointmentsTable th,
 .appointmentsTable td {
-  padding: 1rem 1.2rem;
+  padding: 1.15rem 1.4rem;
   text-align: left;
 }
 
@@ -58,7 +103,7 @@
   background: linear-gradient(135deg, #2c3e50, #34495e);
   color: #fff;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: none;
@@ -66,7 +111,7 @@
 
 .appointmentsTable tbody td {
   color: #4a5568;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   border-bottom: 1px solid #f0f0f0;
 }
 
@@ -145,52 +190,132 @@
   font-size: 0.95rem;
 }
 
-/* Modal */
+/* Modal – modern colored card */
 .appointmentModal {
   background: white;
-  padding: 28px;
-  border-radius: 16px;
+  padding: 0;
+  border-radius: 20px;
   width: 100%;
-  max-width: 500px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  max-width: 480px;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.22);
   outline: none;
+  overflow: hidden;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
 
-.appointmentModal h2 {
-  margin-bottom: 16px;
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 24px 28px 20px;
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  color: #fff;
+}
+
+.modalHeaderIcon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modalTitle {
+  margin: 0;
   font-size: 1.35rem;
   font-weight: 700;
-  color: #2c3e50;
+  color: #fff;
 }
 
-.appointmentModal p {
-  margin: 10px 0;
-  font-size: 15px;
-  color: #4a5568;
+.modalInfo {
+  padding: 8px 28px 4px;
 }
 
-.appointmentModal p strong {
-  color: #2c3e50;
+.modalRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.modalRowLast {
+  border-bottom: none;
+}
+
+.modalIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icGreen { background: #d1fae5; color: #059669; }
+.icBlue { background: #e0f2fe; color: #0284c7; }
+.icViolet { background: #ede9fe; color: #7c3aed; }
+
+.modalText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.modalLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.modalValue {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #0F172A;
+}
+
+.modalStatus {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.statusWarning { background: #FEF3C7; color: #B45309; }
+.statusPrimary { background: #DBEAFE; color: #1D4ED8; }
+.statusSuccess { background: #D1FAE5; color: #047857; }
+.statusError { background: #FEE2E2; color: #B91C1C; }
+.statusDefault { background: #E2E8F0; color: #475569; }
+
+.modalActions {
+  padding: 16px 28px 24px;
 }
 
 .acceptButton {
-  padding: 10px 24px;
-  background: linear-gradient(135deg, #1a7f42, #15803d);
+  width: 100%;
+  padding: 14px;
+  background: #10B981;
   color: #fff;
   border: none;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 600;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .acceptButton:hover {
-  background: linear-gradient(135deg, #15803d, #0d6630);
+  background: #059669;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(26, 127, 66, 0.3);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.3);
 }

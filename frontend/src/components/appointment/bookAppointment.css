@@ -311,6 +311,27 @@
   margin-top: 0.5rem;
 }
 
+/* Reset MUI DatePicker calendar icon button (don't inherit the big gradient button style) */
+.appointment-page .MuiInputAdornment-root .MuiIconButton-root {
+  padding: 8px;
+  margin: 0;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.54);
+  border-radius: 50%;
+  font-size: inherit;
+}
+
+.appointment-page .MuiInputAdornment-root .MuiIconButton-root:hover {
+  background: rgba(0, 0, 0, 0.04);
+  transform: none;
+  box-shadow: none;
+}
+
+.appointment-page .MuiInputAdornment-root .MuiSvgIcon-root {
+  width: 22px;
+  height: 22px;
+}
+
 /* Messages */
 .appointment-page .error-message {
   color: #e53e3e;

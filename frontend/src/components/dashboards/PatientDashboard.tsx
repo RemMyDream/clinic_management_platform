@@ -15,6 +15,15 @@ type Appointment = {
   doctorName?: string;
 };
 
+const STATUS_VI: Record<string, { label: string; cls: string }> = {
+  Pending: { label: 'Chờ xác nhận', cls: styles.statusPending },
+  Confirmed: { label: 'Đã xác nhận', cls: styles.statusConfirmed },
+  Scheduled: { label: 'Đã lên lịch', cls: styles.statusScheduled },
+  Completed: { label: 'Hoàn thành', cls: styles.statusCompleted },
+  Canceled: { label: 'Đã hủy', cls: styles.statusCanceled },
+  'No Show': { label: 'Vắng mặt', cls: styles.statusNoShow },
+};
+
 const PatientDashboard = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [stats, setStats] = useState({
@@ -164,14 +173,19 @@ const PatientDashboard = () => {
                 <div>Lý do</div>
                 <div>Trạng thái</div>
               </div>
-              {appointments.map((a) => (
-                <div key={a.appointment_id} className={styles.tableRow}>
-                  <div className={styles.timeCell}>{a.appointment_time}</div>
-                  <div>{a.doctorName}</div>
-                  <div className={styles.reasonCell}>{a.reason}</div>
-                  <div className={styles.statusUpcoming}>{a.status || 'Đã lên lịch'}</div>
-                </div>
-              ))}
+              {appointments.map((a) => {
+                const st = STATUS_VI[a.status || ''] || { label: a.status || 'Đã lên lịch', cls: styles.statusScheduled };
+                return (
+                  <div key={a.appointment_id} className={styles.tableRow}>
+                    <div className={styles.timeCell}>{a.appointment_time}</div>
+                    <div>{a.doctorName}</div>
+                    <div className={styles.reasonCell}>{a.reason}</div>
+                    <div className={styles.statusCell}>
+                      <span className={`${styles.statusBadge} ${st.cls}`}>{st.label}</span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

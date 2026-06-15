@@ -3,7 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
-import { CircularProgress, Modal, Box, Button, Chip } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { CircularProgress, Modal, Box, Chip } from '@mui/material';
 import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
 import dayjs, { Dayjs } from 'dayjs';
 import { toast } from 'react-toastify';
@@ -39,6 +40,15 @@ const STATUS_LABEL: Record<string, string> = {
   Completed: 'Hoàn thành',
   Canceled: 'Đã hủy',
   'No Show': 'Vắng mặt',
+};
+
+const STATUS_BADGE: Record<string, string> = {
+  Pending: 'apptm-badge-warning',
+  Confirmed: 'apptm-badge-primary',
+  Scheduled: 'apptm-badge-success',
+  Completed: 'apptm-badge-success',
+  Canceled: 'apptm-badge-error',
+  'No Show': 'apptm-badge-warning',
 };
 
 const ViewAppointment = () => {
@@ -244,35 +254,70 @@ const ViewAppointment = () => {
 
         <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <Box className="appointment-modal">
-            <h2>Chi tiết lịch hẹn</h2>
             {selected && (
               <>
-                <p><strong>Bác sĩ:</strong> {selected.doctorName}</p>
-                <p><strong>Ngày:</strong> {formatDate(selected.appointment_day)}</p>
-                <p><strong>Giờ:</strong> {selected.appointment_time}</p>
-                <p><strong>Dịch vụ:</strong> {mapService(selected.service)}</p>
-                <p>
-                  <strong>Trạng thái: </strong>
-                  <Chip
-                    label={STATUS_LABEL[selected.status] || selected.status}
-                    color={STATUS_COLOR[selected.status] || 'default'}
-                    size="small"
-                  />
-                </p>
+                <div className="apptm-header">
+                  <span className="apptm-header-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 11H3v10h6V11zM21 3h-6v18h6V3zM15 7H9v14h6V7z"/>
+                    </svg>
+                  </span>
+                  <div className="apptm-header-text">
+                    <h2 className="apptm-title">Chi tiết lịch hẹn</h2>
+                    <span className={`apptm-status ${STATUS_BADGE[selected.status] || 'apptm-badge-default'}`}>
+                      {STATUS_LABEL[selected.status] || selected.status}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="apptm-info">
+                  <div className="apptm-row">
+                    <span className="apptm-ic ic-green">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </span>
+                    <div className="apptm-text">
+                      <span className="apptm-label">Bác sĩ</span>
+                      <span className="apptm-value">{selected.doctorName}</span>
+                    </div>
+                  </div>
+                  <div className="apptm-row">
+                    <span className="apptm-ic ic-blue">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </span>
+                    <div className="apptm-text">
+                      <span className="apptm-label">Ngày khám</span>
+                      <span className="apptm-value">{formatDate(selected.appointment_day)}</span>
+                    </div>
+                  </div>
+                  <div className="apptm-row">
+                    <span className="apptm-ic ic-violet">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </span>
+                    <div className="apptm-text">
+                      <span className="apptm-label">Giờ khám</span>
+                      <span className="apptm-value">{selected.appointment_time}</span>
+                    </div>
+                  </div>
+                  <div className="apptm-row apptm-row-last">
+                    <span className="apptm-ic ic-amber">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    </span>
+                    <div className="apptm-text">
+                      <span className="apptm-label">Dịch vụ</span>
+                      <span className="apptm-value">{mapService(selected.service)}</span>
+                    </div>
+                  </div>
+                </div>
 
                 {['Pending', 'Confirmed', 'Scheduled'].includes(selected.status) && (
-                  <Box display="flex" gap={2} mt={2} flexWrap="wrap">
-                    <Button variant="contained" color="error" onClick={handleCancel}>
+                  <div className="apptm-actions">
+                    <button className="apptm-btn apptm-btn-cancel" onClick={handleCancel}>
                       Hủy lịch hẹn
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      onClick={() => setShowReschedule((v) => !v)}
-                    >
+                    </button>
+                    <button className="apptm-btn apptm-btn-reschedule" onClick={() => setShowReschedule((v) => !v)}>
                       {showReschedule ? 'Ẩn thay đổi lịch' : 'Thay đổi lịch'}
-                    </Button>
-                  </Box>
+                    </button>
+                  </div>
                 )}
 
                 {showReschedule && ['Pending', 'Confirmed', 'Scheduled'].includes(selected.status) && (
@@ -280,14 +325,16 @@ const ViewAppointment = () => {
                     <h2 className="reschedule-title">Chọn lịch mới</h2>
                     <div className="form-group">
                       <label>Ngày mới</label>
-                      <input
-                        type="date"
-                        min={dayjs().format('YYYY-MM-DD')}
-                        value={rescheduleDate}
-                        onChange={(e) => {
-                          setRescheduleDate(e.target.value);
-                          if (e.target.value) fetchRescheduleSlots(e.target.value);
+                      <DatePicker
+                        value={rescheduleDate ? dayjs(rescheduleDate) : null}
+                        onChange={(v) => {
+                          const str = v ? v.format('YYYY-MM-DD') : '';
+                          setRescheduleDate(str);
+                          if (str) fetchRescheduleSlots(str);
                         }}
+                        format="DD/MM/YYYY"
+                        minDate={dayjs()}
+                        slotProps={{ textField: { size: 'small', fullWidth: true } }}
                       />
                     </div>
                     <div className="form-group">

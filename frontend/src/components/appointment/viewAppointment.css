@@ -212,29 +212,154 @@
 
 .appointment-modal {
   background: white;
-  padding: 28px;
-  border-radius: 16px;
+  padding: 0;
+  border-radius: 20px;
   width: 100%;
-  max-width: 500px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  max-width: 480px;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.22);
   outline: none;
+  overflow: hidden;
 }
 
-.appointment-modal h2 {
-  margin-bottom: 16px;
+/* Header */
+.apptm-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 24px 28px 20px;
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  color: #fff;
+}
+
+.apptm-header-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.apptm-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.apptm-title {
+  margin: 0;
   font-size: 1.35rem;
   font-weight: 700;
-  color: #2c3e50;
+  color: #fff;
 }
 
-.appointment-modal p {
-  margin: 10px 0;
-  font-size: 15px;
-  color: #4a5568;
+.apptm-status {
+  align-self: flex-start;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
 }
 
-.appointment-modal p strong {
-  color: #2c3e50;
+.apptm-badge-warning { background: #FEF3C7; color: #B45309; }
+.apptm-badge-primary { background: #DBEAFE; color: #1D4ED8; }
+.apptm-badge-success { background: #D1FAE5; color: #047857; }
+.apptm-badge-error   { background: #FEE2E2; color: #B91C1C; }
+.apptm-badge-default { background: #E2E8F0; color: #475569; }
+
+/* Info rows */
+.apptm-info {
+  padding: 8px 28px 4px;
+}
+
+.apptm-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.apptm-row-last {
+  border-bottom: none;
+}
+
+.apptm-ic {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ic-blue   { background: #e0f2fe; color: #0284c7; }
+.ic-violet { background: #ede9fe; color: #7c3aed; }
+.ic-green  { background: #d1fae5; color: #059669; }
+.ic-amber  { background: #fef3c7; color: #d97706; }
+
+.apptm-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.apptm-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.apptm-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0F172A;
+}
+
+/* Action buttons */
+.apptm-actions {
+  display: flex;
+  gap: 12px;
+  padding: 18px 28px 24px;
+}
+
+.apptm-btn {
+  flex: 1;
+  padding: 13px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s;
+  border: 1.5px solid transparent;
+}
+
+.apptm-btn-cancel {
+  background: #EF4444;
+  color: #fff;
+}
+
+.apptm-btn-cancel:hover {
+  background: #DC2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.apptm-btn-reschedule {
+  background: #fff;
+  color: #2563EB;
+  border-color: #BFDBFE;
+}
+
+.apptm-btn-reschedule:hover {
+  background: #EFF6FF;
+  border-color: #2563EB;
 }
 
 /* Reschedule section */
@@ -243,7 +368,7 @@
   border-radius: 14px;
   padding: 24px;
   border: 1px solid #e2e8f0;
-  margin-top: 20px;
+  margin: 0 28px 28px;
 }
 
 .reschedule-title {
