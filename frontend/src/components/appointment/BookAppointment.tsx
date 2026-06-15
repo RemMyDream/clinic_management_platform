@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { appointmentApi, doctorApi } from '../../services/api';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs, { Dayjs } from 'dayjs';
 import './bookAppointment.css';
 
 type FormData = {
@@ -26,8 +30,8 @@ type Slot = {
 
 type Filters = {
   service: string;
-  dateFrom: string;
-  dateTo: string;
+  dateFrom: Dayjs | null;
+  dateTo: Dayjs | null;
 };
 
 const BookAppointment: React.FC = () => {
@@ -35,7 +39,7 @@ const BookAppointment: React.FC = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
-  const [filters, setFilters] = useState<Filters>({ service: '', dateFrom: '', dateTo: '' });
+  const [filters, setFilters] = useState<Filters>({ service: '', dateFrom: null, dateTo: null });
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -86,19 +90,19 @@ const BookAppointment: React.FC = () => {
       setError('Vui lòng chọn khoảng thời gian.');
       return;
     }
-    if (filters.dateFrom < today) {
+    if (filters.dateFrom.isBefore(dayjs(today))) {
       setError('Không thể đặt lịch trong quá khứ. Vui lòng chọn ngày từ hôm nay trở đi.');
       return;
     }
-    if (filters.dateFrom > filters.dateTo) {
+    if (filters.dateFrom.isAfter(filters.dateTo)) {
       setError('Ngày bắt đầu phải trước ngày kết thúc.');
       return;
     }
     setLoading(true);
     setError('');
     try {
-      const dateFromString = new Date(filters.dateFrom).toISOString().split('T')[0];
-      const dateToString = new Date(filters.dateTo).toISOString().split('T')[0];
+      const dateFromString = filters.dateFrom.format('YYYY-MM-DD');
+      const dateToString = filters.dateTo.format('YYYY-MM-DD');
       const response = await appointmentApi.getAvailableRange(dateFromString, dateToString);
       const mapped: Slot[] = response.data.flatMap((slot: any) => {
         const [date, time] = slot.datetime.split('T');
@@ -169,17 +173,47 @@ const BookAppointment: React.FC = () => {
   };
 
   const formatDate = (d: string) => {
-    const dt = new Date(d);
+    const dt = new Date(d + 'T12:00:00');
     const dd = String(dt.getDate()).padStart(2, '0');
     const mm = String(dt.getMonth() + 1).padStart(2, '0');
     return `${dd}/${mm}/${dt.getFullYear()}`;
+  };
+
+  const formatDateFull = (d: string) => {
+    const dt = new Date(d + 'T12:00:00');
+    const days = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    const dd = String(dt.getDate()).padStart(2, '0');
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    return `${days[dt.getDay()]}, ${dd}/${mm}/${dt.getFullYear()}`;
   };
 
   return (
     <div className="appointment-page">
       <h1>Đặt lịch khám</h1>
       {error && <p className="error-message">{error}</p>}
-      {success && <p className="success-message">{success}</p>}
+
+      {step <= 3 && (
+        <div className="step-indicator">
+          {(['Chọn ngày', 'Chọn lịch', 'Xác nhận'] as const).map((label, i) => {
+            const num = i + 1;
+            const isDone = step > num;
+            const isActive = step === num;
+            return (
+              <React.Fragment key={num}>
+                {i > 0 && <div className={`step-line ${step > i ? 'step-line-done' : ''}`} />}
+                <div className="step-item">
+                  <div className={`step-dot ${isDone ? 'step-dot-done' : isActive ? 'step-dot-active' : ''}`}>
+                    {isDone
+                      ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                      : num}
+                  </div>
+                  <span className={`step-lbl ${isActive ? 'step-lbl-active' : ''}`}>{label}</span>
+                </div>
+              </React.Fragment>
+            );
+          })}
+        </div>
+      )}
 
       {step === 1 && (
         <div className="filter-section">
@@ -198,12 +232,26 @@ const BookAppointment: React.FC = () => {
 
           <div className="form-group">
             <label>Khoảng thời gian</label>
-            <div className="date-range">
-              <input type="date" name="dateFrom" min={today} value={filters.dateFrom}
-                onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })} />
-              <input type="date" name="dateTo" min={filters.dateFrom || today} value={filters.dateTo}
-                onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })} />
-            </div>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <div className="date-range">
+                <DatePicker
+                  label="Từ ngày"
+                  value={filters.dateFrom}
+                  onChange={(v) => setFilters({ ...filters, dateFrom: v })}
+                  format="DD/MM/YYYY"
+                  minDate={dayjs(today)}
+                  slotProps={{ popper: { placement: 'top-start' } }}
+                />
+                <DatePicker
+                  label="Đến ngày"
+                  value={filters.dateTo}
+                  onChange={(v) => setFilters({ ...filters, dateTo: v })}
+                  format="DD/MM/YYYY"
+                  minDate={filters.dateFrom ?? dayjs(today)}
+                  slotProps={{ popper: { placement: 'top-start' } }}
+                />
+              </div>
+            </LocalizationProvider>
           </div>
 
           <button className="search-btn" onClick={fetchAvailableSlots} disabled={loading}>
@@ -297,19 +345,73 @@ const BookAppointment: React.FC = () => {
       )}
 
       {step === 3 && selectedSlot && (
-        <div className="confirmation-section">
-          <h2>Xác nhận lịch khám</h2>
-          <p><strong>Ngày:</strong> {formatDate(selectedSlot.date)}</p>
-          <p><strong>Giờ:</strong> {selectedSlot.time}</p>
-          <p><strong>Bác sĩ:</strong> {selectedSlot.doctorName}</p>
-          <div className="form-group">
-            <label>Lý do khám bệnh</label>
-            <textarea name="reason" value={formData.reason} onChange={handleChange} required />
+        <div className="confirm-card">
+          <div className="confirm-header">
+            <h2 className="confirm-title">Xác nhận lịch khám</h2>
+            <p className="confirm-subtitle">Kiểm tra lại thông tin trước khi xác nhận</p>
           </div>
-          <button onClick={handleSubmit} disabled={loading}>
-            {loading ? 'Đang đặt lịch...' : 'Xác nhận đặt lịch'}
-          </button>
-          <button onClick={() => setStep(2)}>← Quay lại lịch</button>
+
+          <div className="confirm-info-block">
+            <div className="confirm-info-row">
+              <span className="confirm-icon ci-blue">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+              </span>
+              <div className="confirm-info-text">
+                <span className="ci-label">Ngày khám</span>
+                <span className="ci-value">{formatDateFull(selectedSlot.date)}</span>
+              </div>
+            </div>
+
+            <div className="confirm-info-row">
+              <span className="confirm-icon ci-violet">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </span>
+              <div className="confirm-info-text">
+                <span className="ci-label">Giờ khám</span>
+                <span className="ci-value">{selectedSlot.time}</span>
+              </div>
+            </div>
+
+            <div className="confirm-info-row confirm-info-row-last">
+              <span className="confirm-icon ci-green">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+              </span>
+              <div className="confirm-info-text">
+                <span className="ci-label">Bác sĩ</span>
+                <span className="ci-value">{selectedSlot.doctorName}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="confirm-reason-block">
+            <label className="ci-label" htmlFor="reason">
+              Lý do khám <span className="ci-optional">(không bắt buộc)</span>
+            </label>
+            <textarea
+              id="reason"
+              className="confirm-textarea"
+              name="reason"
+              value={formData.reason}
+              onChange={handleChange}
+              placeholder="Mô tả triệu chứng hoặc lý do khám..."
+              rows={3}
+            />
+          </div>
+
+          <div className="confirm-actions">
+            <button className="btn-confirm" onClick={handleSubmit} disabled={loading}>
+              {loading ? 'Đang xử lý...' : 'Xác nhận đặt lịch'}
+            </button>
+            <button className="btn-back-text" onClick={() => setStep(2)}>
+              ← Quay lại
+            </button>
+          </div>
         </div>
       )}
 

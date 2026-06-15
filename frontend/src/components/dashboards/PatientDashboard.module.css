@@ -46,10 +46,7 @@
 .header {
   margin-bottom: var(--spacing-10);
   text-align: left;
-  padding: var(--spacing-8) 0;
-  background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--primary-200);
+  padding: var(--spacing-4) 0;
   animation: fadeInUp 0.8s ease-out;
 }
 
@@ -70,6 +67,7 @@
   font-size: var(--font-size-xl);
   margin: 0;
   font-weight: var(--font-weight-normal);
+  font-style: italic;
   opacity: 0.8;
   text-align: left;
 }

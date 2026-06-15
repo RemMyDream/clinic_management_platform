@@ -1,7 +1,6 @@
 // components/dashboardLayout/Sidebar.tsx
 import React from 'react';
-// import Link from 'next/link';
-import { Link } from 'react-router-dom'; // Correct import
+import { NavLink } from 'react-router-dom';
 
 import { UserRole } from '../../types/UserType'; // Adjust the import path as necessary
 
@@ -52,16 +51,19 @@ const Sidebar: React.FC<Props> = ({ role }) => {
         alt="Logo phòng khám"
         className="nav-logo"
       />
-      <h2 className="nav-title">Điều hướng</h2>
 
       <hr className="nav-divider" />
 
       <ul className="nav-list">
         {items.map((item) => (
           <li key={item.label}>
-            <Link to={item.path} className="nav-link">
+            <NavLink
+              to={item.path}
+              end
+              className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+            >
               {item.label}
-            </Link>
+            </NavLink>
           </li>
         ))}
       </ul>

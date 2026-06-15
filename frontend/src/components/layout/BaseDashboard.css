@@ -8,10 +8,12 @@
 }
 
 .sidebar {
-  width: 250px;
-  background-color: var(--secondary-900);
+  width: 280px;
+  background-color: #2563EB;
   color: var(--white);
   padding: var(--spacing-5) var(--spacing-3);
+  box-shadow: 2px 0 16px rgba(37, 99, 235, 0.15);
+  z-index: 5;
 }
 
 .main-content {
@@ -19,6 +21,51 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
+  background-color: #F8FAFC;
+}
+
+.main-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(37, 99, 235, 0.08) 1.5px, transparent 1.5px);
+  background-size: 26px 26px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Healthcare decorative elements */
+.health-decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.decor-heart {
+  position: absolute;
+  bottom: 48px;
+  left: -48px;
+  width: 340px;
+  height: 320px;
+}
+
+.decor-cross {
+  position: absolute;
+}
+
+.dc1 { top: 10%; right: 5%;  width: 56px; height: 56px; }
+.dc2 { top: 42%; right: 2%;  width: 38px; height: 38px; }
+.dc3 { top: 70%; right: 10%; width: 26px; height: 26px; }
+
+.decor-wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 120px;
 }
 
 .header {
@@ -28,7 +75,9 @@
   background-color: var(--white);
   padding: var(--spacing-3) var(--spacing-5);
   box-shadow: var(--shadow-sm);
-  z-index: 1000;
+  border-bottom: 1px solid #E2E8F0;
+  position: relative;
+  z-index: 10;
 }
 
 .header-left {
@@ -37,7 +86,9 @@
 }
 
 .logo {
-  height: 40px;
+  height: 56px;
+  width: 56px;
+  object-fit: contain;
   margin-right: var(--spacing-3);
 }
 
@@ -129,5 +180,7 @@
   padding: var(--spacing-5);
   overflow-y: auto;
   flex: 1;
-  background-color: var(--secondary-50);
+  background-color: transparent;
+  position: relative;
+  z-index: 1;
 }

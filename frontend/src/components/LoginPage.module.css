@@ -7,7 +7,7 @@
 /* Left panel - branding */
 .leftPanel {
   flex: 1;
-  background: linear-gradient(135deg, #1a7f42 0%, #15803d 40%, #0d6630 100%);
+  background: linear-gradient(135deg, #0EA5E9 0%, #2563EB 45%, #1D4ED8 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -89,7 +89,7 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background: #f8faf9;
+  background: #F8FAFC;
 }
 
 .card {
@@ -139,8 +139,8 @@
 
 .input:focus {
   outline: none;
-  border-color: #1a7f42;
-  box-shadow: 0 0 0 3px rgba(26, 127, 66, 0.12);
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 .errorText {
@@ -154,7 +154,7 @@
 
 .submitBtn {
   padding: 13px;
-  background: linear-gradient(135deg, #1a7f42, #15803d);
+  background: linear-gradient(135deg, #2563EB, #1D4ED8);
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -165,9 +165,9 @@
 }
 
 .submitBtn:hover {
-  background: linear-gradient(135deg, #15803d, #0d6630);
+  background: linear-gradient(135deg, #1D4ED8, #1E40AF);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(26, 127, 66, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .submitBtn:disabled {
@@ -231,7 +231,7 @@
 }
 
 .link {
-  color: #1a7f42;
+  color: #2563EB;
   font-size: 0.9rem;
   text-decoration: none;
   font-weight: 500;

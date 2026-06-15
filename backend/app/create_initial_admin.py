@@ -68,7 +68,7 @@ async def create_initial_users():
             },
             {
                 "username": "dr_johnson",
-                "email": " ", 
+                "email": "dr.johnson@clinic.com",
                 "password": "doctor123",
                 "full_name": "Dr. Sarah Johnson",
                 "major": "Pediatrics"
