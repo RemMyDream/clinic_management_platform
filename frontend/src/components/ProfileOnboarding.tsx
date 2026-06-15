@@ -34,6 +34,8 @@ const ProfileOnboarding: React.FC = () => {
     email: '',
     phone_number: '',
     gender: '',
+    identification_id: '',
+    health_insurance_card_no: '',
   });
 
   const [address, setAddress] = useState({
@@ -72,8 +74,16 @@ const ProfileOnboarding: React.FC = () => {
 
   const handleNext = () => {
     if (currentStep === 1) {
-      if (!personal.full_name || !personal.date_of_birth || !personal.phone_number || !personal.gender) {
+      if (!personal.full_name || !personal.date_of_birth || !personal.phone_number || !personal.gender || !personal.identification_id) {
         toast.error('Vui lòng điền đầy đủ thông tin bắt buộc.');
+        return;
+      }
+      if (!/^\d{12}$/.test(personal.identification_id)) {
+        toast.error('CMND/CCCD phải bao gồm đúng 12 chữ số.');
+        return;
+      }
+      if (personal.health_insurance_card_no && personal.health_insurance_card_no.length < 10) {
+        toast.error('Số BHYT không hợp lệ (tối thiểu 10 ký tự).');
         return;
       }
       setCurrentStep(2);
@@ -104,6 +114,8 @@ const ProfileOnboarding: React.FC = () => {
         gender: personal.gender,
         phone_number: personal.phone_number,
         email: personal.email || undefined,
+        identification_id: personal.identification_id,
+        health_insurance_card_no: personal.health_insurance_card_no || undefined,
         ethnic_group: address.ethnic_group,
         job: address.job,
         address: fullAddress,
@@ -167,6 +179,17 @@ const ProfileOnboarding: React.FC = () => {
                 <option value="Female">Nữ</option>
                 <option value="Other">Khác</option>
               </select>
+            </div>
+            <div className={styles.field}>
+              <label>Số CMND / CCCD <span className={styles.required}>*</span></label>
+              <input type="text" value={personal.identification_id} placeholder="Nhập 12 số CCCD"
+                maxLength={12}
+                onChange={(e) => setPersonal({ ...personal, identification_id: e.target.value })} />
+            </div>
+            <div className={styles.field}>
+              <label>Số thẻ BHYT (tùy chọn)</label>
+              <input type="text" value={personal.health_insurance_card_no} placeholder="Mã số bảo hiểm y tế"
+                onChange={(e) => setPersonal({ ...personal, health_insurance_card_no: e.target.value })} />
             </div>
             <button className={styles.primaryBtn} onClick={handleNext}>Tiếp tục</button>
           </div>

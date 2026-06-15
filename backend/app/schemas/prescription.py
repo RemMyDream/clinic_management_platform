@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 
 
@@ -6,7 +6,7 @@ class PrescriptionBase(BaseModel):
     report_id: int
     medication_name: str
     dosage: str
-    quantity: int
+    quantity: int = Field(..., ge=0)
 
 
 class PrescriptionCreate(PrescriptionBase):

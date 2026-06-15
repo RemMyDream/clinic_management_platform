@@ -105,12 +105,12 @@ const CheckInOut: React.FC = () => {
       a.reason.toLowerCase().includes(q);
     const matchTab =
       activeTab === 'scheduled'
-        ? a.status === 'Scheduled'
+        ? (a.status === 'Scheduled' || a.status === 'Confirmed')
         : a.status === 'Completed';
     return matchSearch && matchTab;
   });
 
-  const scheduledCount = appointments.filter((a) => a.status === 'Scheduled').length;
+  const scheduledCount = appointments.filter((a) => a.status === 'Scheduled' || a.status === 'Confirmed').length;
   const completedCount = appointments.filter((a) => a.status === 'Completed').length;
   const canceledCount = appointments.filter((a) => a.status === 'Canceled').length;
 
@@ -219,7 +219,7 @@ const CheckInOut: React.FC = () => {
                   </div>
                 </div>
 
-                {appt.status === 'Scheduled' && (
+                {(appt.status === 'Scheduled' || appt.status === 'Confirmed') && (
                   <div className={styles.appointmentActions}>
                     <button
                       className={styles.checkInButton}

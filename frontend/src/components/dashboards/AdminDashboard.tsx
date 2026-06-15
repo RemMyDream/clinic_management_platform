@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import ChatbotWidget from '../Chatbot/ChatbotWidget';
 import styles from './AdminDashboard.module.css';
 import { userApi } from '../../services/api';
 
@@ -125,14 +126,33 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className={styles.activitySection}>
-        <h3 className={styles.sectionTitle}>Tổng quan hệ thống</h3>
-        <div className={styles.activityCard}>
-          <p>✅ Hệ thống đang hoạt động ổn định</p>
-          <p>📈 Hoạt động người dùng bình thường</p>
-          <p>🛡️ Tất cả kiểm tra bảo mật đã vượt qua</p>
-          <p>💾 Sao lưu cơ sở dữ liệu đã cập nhật</p>
+      {/* Recent Activity & AI Assistant */}
+      <div className={styles.gridLayout}>
+        <div className={styles.activitySection}>
+          <h3 className={styles.sectionTitle}>Tổng quan hệ thống</h3>
+          <div className={styles.activityCard}>
+            <p>✅ Hệ thống đang hoạt động ổn định</p>
+            <p>📈 Hoạt động người dùng bình thường</p>
+            <p>🛡️ Tất cả kiểm tra bảo mật đã vượt qua</p>
+            <p>💾 Sao lưu cơ sở dữ liệu đã cập nhật</p>
+          </div>
+        </div>
+
+        <div className={styles.activitySection}>
+          <h3 className={styles.sectionTitle}>🤖 Trợ lý AI y tế (Quản trị)</h3>
+          <div className={styles.chatCard}>
+            <p className={styles.chatDescription}>
+              Trò chuyện với trợ lý AI phòng khám để được hỗ trợ quản trị hệ thống, tra cứu thông tin vận hành phòng khám hoặc nhập ID bệnh nhân để xem EMR.
+            </p>
+            <div className={styles.flexGrow}>
+              <ChatbotWidget
+                userRole="ADMIN"
+                isAuthenticated={true}
+                position="inline"
+                placeholder="Hỏi về quản trị hệ thống, tài khoản hoặc nhập ID bệnh nhân..."
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

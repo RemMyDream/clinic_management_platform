@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ChatbotWidget from '../Chatbot/ChatbotWidget';
 import styles from './DoctorDashboard.module.css';
 import { appointmentApi, patientApi, medicalReportApi } from '../../services/api';
 
@@ -151,40 +152,59 @@ const DoctorDashboard = () => {
         </div>
       </div>
 
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Lịch trình hôm nay</h3>
-        {appointments.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p>Không có lịch hẹn nào được lên lịch cho hôm nay.</p>
-          </div>
-        ) : (
-          <div className={styles.appointmentsTable}>
-            <div className={styles.tableHeader}>
-              <div>Thời gian</div>
-              <div>Bệnh nhân</div>
-              <div>Lý do</div>
-              <div>Trạng thái</div>
+      <div className={styles.gridLayout}>
+        <div className={styles.section}>
+          <h3 className={styles.sectionTitle}>Lịch trình hôm nay</h3>
+          {appointments.length === 0 ? (
+            <div className={styles.emptyState}>
+              <p>Không có lịch hẹn nào được lên lịch cho hôm nay.</p>
             </div>
-            {appointments.map((a) => (
-              <div key={a.appointment_id} className={styles.tableRow}>
-                <div className={styles.timeCell}>{a.appointment_time}</div>
-                <div>{a.patientName}</div>
-                <div className={styles.reasonCell}>{a.reason}</div>
-                <div>
-                  <span className={
-                    a.status === 'Completed' ? styles.statusCompleted :
-                    a.status === 'Canceled' ? styles.statusCanceled :
-                    styles.statusUpcoming
-                  }>
-                    {a.status === 'Completed' ? 'Hoàn thành' :
-                     a.status === 'Canceled' ? 'Đã hủy' :
-                     a.status === 'No Show' ? 'Vắng mặt' : 'Đã lên lịch'}
-                  </span>
-                </div>
+          ) : (
+            <div className={styles.appointmentsTable}>
+              <div className={styles.tableHeader}>
+                <div>Thời gian</div>
+                <div>Bệnh nhân</div>
+                <div>Lý do</div>
+                <div>Trạng thái</div>
               </div>
-            ))}
+              {appointments.map((a) => (
+                <div key={a.appointment_id} className={styles.tableRow}>
+                  <div className={styles.timeCell}>{a.appointment_time}</div>
+                  <div>{a.patientName}</div>
+                  <div className={styles.reasonCell}>{a.reason}</div>
+                  <div>
+                    <span className={
+                      a.status === 'Completed' ? styles.statusCompleted :
+                      a.status === 'Canceled' ? styles.statusCanceled :
+                      styles.statusUpcoming
+                    }>
+                      {a.status === 'Completed' ? 'Hoàn thành' :
+                       a.status === 'Canceled' ? 'Đã hủy' :
+                       a.status === 'No Show' ? 'Vắng mặt' : 'Đã lên lịch'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className={styles.section}>
+          <h3 className={styles.sectionTitle}>🤖 Trợ lý AI y tế</h3>
+          <div className={styles.chatCard}>
+            <p className={styles.chatDescription}>
+              Trò chuyện với trợ lý AI phòng khám để được hỗ trợ thông tin y khoa, chẩn đoán ban đầu và tra cứu EMR bệnh nhân.
+            </p>
+            <div className={styles.flexGrow}>
+              <ChatbotWidget
+                userRole="DOCTOR"
+                isAuthenticated={true}
+                position="inline"
+                placeholder="Hỏi về chuẩn đoán, thông tin y khoa hoặc nhập ID bệnh nhân..."
+              />
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

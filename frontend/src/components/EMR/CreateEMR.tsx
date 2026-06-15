@@ -212,12 +212,12 @@ const CreateEMR: React.FC = () => {
             <h3 className={styles.sectionTitle}>Dấu hiệu sinh tồn</h3>
             <div className={styles.vitalSignsGrid}>
               {[
-                { id: 'pulse_rate', label: 'Nhịp tim (lần/phút)', placeholder: 'ví dụ: 72', type: 'number' },
-                { id: 'temperature', label: 'Nhiệt độ (°C)', placeholder: 'ví dụ: 36.5', type: 'number', step: '0.1' },
+                { id: 'pulse_rate', label: 'Nhịp tim (lần/phút)', placeholder: 'ví dụ: 72', type: 'number', min: '0' },
+                { id: 'temperature', label: 'Nhiệt độ (°C)', placeholder: 'ví dụ: 36.5', type: 'number', step: '0.1', min: '0' },
                 { id: 'blood_pressure', label: 'Huyết áp', placeholder: 'ví dụ: 120/80', type: 'text' },
-                { id: 'respiratory_rate', label: 'Nhịp thở (lần/phút)', placeholder: 'ví dụ: 16', type: 'number' },
-                { id: 'weight', label: 'Cân nặng (kg)', placeholder: 'ví dụ: 70.5', type: 'number', step: '0.1' },
-              ].map(({ id, label, placeholder, type, step }) => (
+                { id: 'respiratory_rate', label: 'Nhịp thở (lần/phút)', placeholder: 'ví dụ: 16', type: 'number', min: '0' },
+                { id: 'weight', label: 'Cân nặng (kg)', placeholder: 'ví dụ: 70.5', type: 'number', step: '0.1', min: '0' },
+              ].map(({ id, label, placeholder, type, step, min }) => (
                 <div key={id} className={styles.formGroup}>
                   <label htmlFor={id} className={styles.label}>{label}:</label>
                   <input
@@ -225,6 +225,7 @@ const CreateEMR: React.FC = () => {
                     id={id}
                     name={id}
                     step={step}
+                    min={min}
                     value={(formData as any)[id]}
                     onChange={handleChange}
                     className={styles.input}
@@ -285,6 +286,7 @@ const CreateEMR: React.FC = () => {
             <label className={styles.label}>Số lượng:</label>
             <input
               type="number"
+              min="0"
               value={newMed.quantity}
               onChange={(e) => setNewMed((p) => ({ ...p, quantity: e.target.value }))}
               className={styles.input}

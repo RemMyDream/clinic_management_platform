@@ -142,7 +142,7 @@ const BookAppointment: React.FC = () => {
       setFormData({ date: '', time: '', doctorId: null, reason: '' });
       setStep(4);
     } catch {
-      setError('Không thể đặt lịch khám. Vui lòng thử lại.');
+      setError('Không thể đặt lịch khám. Vui lòng chọn lịch khám khác.');
     } finally {
       setLoading(false);
     }
