@@ -26,6 +26,15 @@ const STATUS_LABEL: Record<string, string> = {
   'No Show': 'Vắng mặt',
 };
 
+const STATUS_BADGE: Record<string, string> = {
+  Pending: styles.statusPending,
+  Confirmed: styles.statusConfirmed,
+  Scheduled: styles.statusScheduled,
+  Completed: styles.statusCompleted,
+  Canceled: styles.statusCanceled,
+  'No Show': styles.statusNoShow,
+};
+
 const StaffDashboard = () => {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -163,7 +172,7 @@ const StaffDashboard = () => {
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>Yêu cầu đặt lịch chờ duyệt ({pendingAppointments.length})</h3>
           <div className={styles.appointmentsTable}>
-            <div className={styles.tableHeader}>
+            <div className={`${styles.tableHeader} ${styles.cols6}`}>
               <div>Ngày</div>
               <div>Giờ</div>
               <div>Bệnh nhân</div>
@@ -172,7 +181,7 @@ const StaffDashboard = () => {
               <div>Thao tác</div>
             </div>
             {pendingAppointments.map((a) => (
-              <div key={a.appointment_id} className={styles.tableRow}>
+              <div key={a.appointment_id} className={`${styles.tableRow} ${styles.cols6}`}>
                 <div>{formatDate(a.appointment_day)}</div>
                 <div className={styles.timeCell}>{a.appointment_time}</div>
                 <div>{a.patientName}</div>
@@ -196,7 +205,7 @@ const StaffDashboard = () => {
             <div className={styles.emptyState}><p>Không có cuộc hẹn nào được lên lịch cho hôm nay</p></div>
           ) : (
             <div className={styles.appointmentsTable}>
-              <div className={styles.tableHeader}>
+              <div className={`${styles.tableHeader} ${styles.cols5}`}>
                 <div>Thời gian</div>
                 <div>Bệnh nhân</div>
                 <div>Bác sĩ</div>
@@ -204,13 +213,15 @@ const StaffDashboard = () => {
                 <div>Trạng thái</div>
               </div>
               {appointments.map((a) => (
-                <div key={a.appointment_id} className={styles.tableRow}>
+                <div key={a.appointment_id} className={`${styles.tableRow} ${styles.cols5}`}>
                   <div className={styles.timeCell}>{a.appointment_time}</div>
                   <div>{a.patientName}</div>
                   <div>{a.doctorName}</div>
                   <div className={styles.reasonCell}>{a.reason}</div>
                   <div>
-                    <span className={styles.statusPending}>{STATUS_LABEL[a.status] || a.status}</span>
+                    <span className={`${styles.statusBadge} ${STATUS_BADGE[a.status] || styles.statusNoShow}`}>
+                      {STATUS_LABEL[a.status] || a.status}
+                    </span>
                   </div>
                 </div>
               ))}

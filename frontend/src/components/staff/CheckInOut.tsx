@@ -16,6 +16,8 @@ interface Appointment {
 }
 
 const STATUS_LABEL: Record<string, string> = {
+  Pending: 'Chờ xác nhận',
+  Confirmed: 'Đã xác nhận',
   Scheduled: 'Đã lên lịch',
   Completed: 'Hoàn thành',
   Canceled: 'Đã hủy',
@@ -129,28 +131,24 @@ const CheckInOut: React.FC = () => {
       <div className={styles.statsSection}>
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
-            <div className={styles.statIcon}>📅</div>
             <div className={styles.statInfo}>
               <h4>Tổng cuộc hẹn</h4>
               <p className={styles.statNumber}>{appointments.length}</p>
             </div>
           </div>
           <div className={styles.statCard}>
-            <div className={styles.statIcon}>⏳</div>
             <div className={styles.statInfo}>
               <h4>Đang chờ</h4>
               <p className={styles.statNumber}>{scheduledCount}</p>
             </div>
           </div>
           <div className={styles.statCard}>
-            <div className={styles.statIcon}>✅</div>
             <div className={styles.statInfo}>
               <h4>Hoàn thành</h4>
               <p className={styles.statNumber}>{completedCount}</p>
             </div>
           </div>
           <div className={styles.statCard}>
-            <div className={styles.statIcon}>❌</div>
             <div className={styles.statInfo}>
               <h4>Đã hủy</h4>
               <p className={styles.statNumber}>{canceledCount}</p>
@@ -230,7 +228,6 @@ const CheckInOut: React.FC = () => {
                     <button
                       className={styles.checkOutButton}
                       onClick={() => handleCancel(appt)}
-                      style={{ marginTop: '8px', backgroundColor: '#ef4444' }}
                     >
                       Hủy lịch
                     </button>

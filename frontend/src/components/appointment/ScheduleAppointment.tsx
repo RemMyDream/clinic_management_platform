@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 import './scheduleAppointment.css';
 import { appointmentApi, patientApi, doctorApi } from '../../services/api';
 
@@ -245,14 +249,17 @@ const ScheduleAppointment: React.FC = () => {
 
             <div className="form-group">
               <label>Ngày *</label>
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleFormChange}
-                min={new Date().toISOString().split('T')[0]}
-                required
-              />
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  value={formData.date ? dayjs(formData.date) : null}
+                  onChange={(v) =>
+                    setFormData((prev) => ({ ...prev, date: v ? v.format('YYYY-MM-DD') : '' }))
+                  }
+                  format="DD/MM/YYYY"
+                  minDate={dayjs()}
+                  slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                />
+              </LocalizationProvider>
             </div>
 
             <div className="form-buttons">
@@ -301,7 +308,7 @@ const ScheduleAppointment: React.FC = () => {
                           className="doctor-slot-button"
                           onClick={() => handleSlotSelect(slot, doctor.doctor_id)}
                         >
-                          Dr. {doctor.doctor_name}
+                          {doctor.doctor_name}
                         </button>
                       ))}
                   </div>
