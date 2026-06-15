@@ -29,9 +29,9 @@ const sidebarItems: Record<Props['role'], { label: string; path: string }[]> = {
   CLINIC_STAFF: [
     { label: 'Bảng điều khiển', path: '/dashboard' },
     { label: 'Sắp xếp lịch hẹn', path: '/dashboard/appointments/schedule' },
-    { label: 'Đăng ký / Thanh toán', path: '/dashboard/checkin' },
+    { label: 'Check-in bệnh nhân', path: '/dashboard/checkin' },
+    { label: 'Thanh toán & Hóa đơn', path: '/dashboard/billing' },
     { label: 'Đăng ký bệnh nhân', path: '/dashboard/patients' },
-    { label: 'Tin nhắn', path: '/dashboard/messages' },
   ],
   ADMIN: [
     { label: 'Bảng điều khiển', path: '/dashboard' },

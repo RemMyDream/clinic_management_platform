@@ -57,7 +57,7 @@ const DoctorSchedule = () => {
         upcoming.map(async (a: Appointment) => {
           try {
             const p = await patientApi.getById(a.patient_id);
-            return { ...a, patientName: p.data.full_name };
+            return { ...a, patientName: p.data?.full_name || 'Bệnh nhân không xác định' };
           } catch {
             return { ...a, patientName: 'Bệnh nhân không xác định' };
           }
@@ -184,11 +184,19 @@ const DoctorSchedule = () => {
                   <td>{appointment.patientName}</td>
                   <td>{appointment.reason}</td>
                   <td>
-                    <Chip
-                      label={STATUS_LABEL[appointment.status] || appointment.status}
-                      color={STATUS_COLOR[appointment.status] || 'default'}
-                      size="small"
-                    />
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        padding: '4px 8px',
+                        borderRadius: '16px',
+                        fontSize: '0.8125rem',
+                        fontWeight: 500,
+                        backgroundColor: appointment.status === 'Confirmed' ? '#e3f2fd' : (appointment.status === 'Scheduled' ? '#e8f5e9' : '#f5f5f5'),
+                        color: appointment.status === 'Confirmed' ? '#1976d2' : (appointment.status === 'Scheduled' ? '#2e7d32' : '#rgba(0, 0, 0, 0.87)'),
+                      }}
+                    >
+                      {STATUS_LABEL[appointment.status] || appointment.status}
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -207,11 +215,19 @@ const DoctorSchedule = () => {
                   <p><strong>Ngày:</strong> {formatDate(selectedAppointment.appointment_day)}</p>
                   <p><strong>Giờ:</strong> {selectedAppointment.appointment_time}</p>
                   <p><strong>Trạng thái:</strong>{' '}
-                    <Chip
-                      label={STATUS_LABEL[selectedAppointment.status] || selectedAppointment.status}
-                      color={STATUS_COLOR[selectedAppointment.status] || 'default'}
-                      size="small"
-                    />
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        padding: '4px 8px',
+                        borderRadius: '16px',
+                        fontSize: '0.8125rem',
+                        fontWeight: 500,
+                        backgroundColor: selectedAppointment.status === 'Confirmed' ? '#e3f2fd' : '#f5f5f5',
+                        color: selectedAppointment.status === 'Confirmed' ? '#1976d2' : '#rgba(0, 0, 0, 0.87)',
+                      }}
+                    >
+                      {STATUS_LABEL[selectedAppointment.status] || selectedAppointment.status}
+                    </span>
                   </p>
 
                   {selectedAppointment.status === 'Confirmed' && (

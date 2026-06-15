@@ -16,7 +16,20 @@ class AppointmentService:
 
     @staticmethod
     def create(db: Session, appointment: AppointmentCreate, current_user: User) -> Appointment:
-        if current_user.role.value in [UserRole.CLINIC_STAFF.value, UserRole.ADMIN.value]:
+        from ..models import Appointment, AppointmentStatus
+        from ..database import UserRole
+
+        existing = db.query(Appointment).filter(
+            Appointment.doctor_id == appointment.doctor_id,
+            Appointment.appointment_day == appointment.appointment_day,
+            Appointment.appointment_time == appointment.appointment_time,
+            Appointment.status.in_([AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED, AppointmentStatus.SCHEDULED])
+        ).first()
+
+        if existing:
+            raise HTTPException(status_code=409, detail="Khung giờ này đã có người đặt, vui lòng chọn khung giờ khác.")
+
+        if current_user.role.value == UserRole.CLINIC_STAFF.value or current_user.role.value == UserRole.ADMIN.value:
             return AppointmentRepository.create(db, appointment, appointment.patient_id, AppointmentStatus.CONFIRMED)
         return AppointmentRepository.create(db, appointment, current_user.user_id, AppointmentStatus.PENDING)
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
@@ -41,6 +42,8 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const ViewAppointment = () => {
+  const [searchParams] = useSearchParams();
+  const patientIdParam = searchParams.get('patient_id');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -70,11 +73,18 @@ const ViewAppointment = () => {
     setLoading(true);
     try {
       const res = await appointmentApi.getMyAppointments();
+      let appointmentsData = res.data;
+      if (patientIdParam) {
+        appointmentsData = appointmentsData.filter(
+          (a: Appointment) => a.patient_id === parseInt(patientIdParam, 10)
+        );
+      }
+
       const enriched = await Promise.all(
-        res.data.map(async (a: Appointment) => {
+        appointmentsData.map(async (a: Appointment) => {
           try {
             const docRes = await doctorApi.getById(a.doctor_id);
-            return { ...a, doctorName: docRes.data.doctor_name };
+            return { ...a, doctorName: docRes.data?.doctor_name || 'Bác sĩ không xác định' };
           } catch {
             return { ...a, doctorName: 'Bác sĩ không xác định' };
           }
@@ -90,7 +100,7 @@ const ViewAppointment = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [patientIdParam]);
 
   useEffect(() => { loadAppointments(); }, [loadAppointments]);
 

@@ -80,6 +80,20 @@ const Profile: React.FC = () => {
         e.preventDefault();
         setLoading(true);
         setError('');
+
+        if ('patient_id' in userData) {
+            if (formData.identification_id && !/^\d{12}$/.test(formData.identification_id)) {
+                toast.error('CMND/CCCD phải bao gồm đúng 12 chữ số.');
+                setLoading(false);
+                return;
+            }
+            if (formData.health_insurance_card_no && formData.health_insurance_card_no.length < 10) {
+                toast.error('Số BHYT không hợp lệ (tối thiểu 10 ký tự).');
+                setLoading(false);
+                return;
+            }
+        }
+
         try {
             const payload: { [key: string]: any } = { ...formData };
             if (payload.phone && !payload.phone_number) payload.phone_number = payload.phone;

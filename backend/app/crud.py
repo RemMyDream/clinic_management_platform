@@ -45,14 +45,14 @@ def create_user(db: Session, user: schemas.UserCreate):
         user_id_value = db_user.user_id
         full_name_value = db_user.full_name
 
-        if user.role == "PATIENT":
+        if user.role.value == "PATIENT":
             patient_in = schemas.PatientCreate(
                 patient_id=user_id_value,
                 full_name=full_name_value,
             )
             create_patient(db=db, patient_in=patient_in, creator_id=user_id_value)
 
-        elif user.role == "DOCTOR":
+        elif user.role.value == "DOCTOR":
             doctor_in = schemas.DoctorCreate(
                 doctor_id=user_id_value,
                 doctor_name=full_name_value,
@@ -60,7 +60,7 @@ def create_user(db: Session, user: schemas.UserCreate):
             )
             create_doctor(db=db, doctor_in=doctor_in, creator_id=user_id_value)
 
-        elif user.role == "CLINIC_STAFF":
+        elif user.role.value == "CLINIC_STAFF":
             from .repositories import StaffRepository
             staff_in = schemas.StaffCreate(staff_id=user_id_value)
             StaffRepository.create(db, staff_in)

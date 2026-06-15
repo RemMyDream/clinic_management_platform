@@ -68,7 +68,7 @@ async def create_initial_users():
             },
             {
                 "username": "dr_johnson",
-                "email": "dr.johnson@clinic.com", 
+                "email": " ", 
                 "password": "doctor123",
                 "full_name": "Dr. Sarah Johnson",
                 "major": "Pediatrics"
@@ -125,40 +125,40 @@ async def create_initial_users():
             else:
                 print(f"⚠️  Staff already exists: {staff_info['email']}")
 
-        # # --- 5. CREATE PATIENT USERS ---
-        # print("\n5. Creating Patient Users...")
-        # patients_data = [
-        #     {"username": "patient_alice", "email": "alice.wilson@email.com", "full_name": "Alice Wilson", "gender": "Female", "age": 28},
-        #     {"username": "patient_bob", "email": "bob.martinez@email.com", "full_name": "Bob Martinez", "gender": "Male", "age": 35},
-        #     {"username": "patient_carol", "email": "carol.davis@email.com", "full_name": "Carol Davis", "gender": "Female", "age": 42},
-        #     {"username": "patient_david", "email": "david.garcia@email.com", "full_name": "David Garcia", "gender": "Male", "age": 19},
-        #     {"username": "patient_emma", "email": "emma.rodriguez@email.com", "full_name": "Emma Rodriguez", "gender": "Female", "age": 31},
-        #     {"username": "patient_frank", "email": "frank.lopez@email.com", "full_name": "Frank Lopez", "gender": "Male", "age": 67},
-        #     {"username": "patient_grace", "email": "grace.lee@email.com", "full_name": "Grace Lee", "gender": "Female", "age": 24},
-        #     {"username": "patient_henry", "email": "henry.walker@email.com", "full_name": "Henry Walker", "gender": "Male", "age": 53},
-        #     {"username": "patient_iris", "email": "iris.hall@email.com", "full_name": "Iris Hall", "gender": "Female", "age": 29},
-        #     {"username": "patient_jack", "email": "jack.allen@email.com", "full_name": "Jack Allen", "gender": "Male", "age": 45}
-        # ]
+        # --- 5. CREATE PATIENT USERS ---
+        print("\n5. Creating Patient Users...")
+        patients_data = [
+            {"username": "patient_alice", "email": "alice.wilson@email.com", "full_name": "Alice Wilson", "gender": "Female", "age": 28},
+            {"username": "patient_bob", "email": "bob.martinez@email.com", "full_name": "Bob Martinez", "gender": "Male", "age": 35},
+            {"username": "patient_carol", "email": "carol.davis@email.com", "full_name": "Carol Davis", "gender": "Female", "age": 42},
+            {"username": "patient_david", "email": "david.garcia@email.com", "full_name": "David Garcia", "gender": "Male", "age": 19},
+            {"username": "patient_emma", "email": "emma.rodriguez@email.com", "full_name": "Emma Rodriguez", "gender": "Female", "age": 31},
+            {"username": "patient_frank", "email": "frank.lopez@email.com", "full_name": "Frank Lopez", "gender": "Male", "age": 67},
+            {"username": "patient_grace", "email": "grace.lee@email.com", "full_name": "Grace Lee", "gender": "Female", "age": 24},
+            {"username": "patient_henry", "email": "henry.walker@email.com", "full_name": "Henry Walker", "gender": "Male", "age": 53},
+            {"username": "patient_iris", "email": "iris.hall@email.com", "full_name": "Iris Hall", "gender": "Female", "age": 29},
+            {"username": "patient_jack", "email": "jack.allen@email.com", "full_name": "Jack Allen", "gender": "Male", "age": 45}
+        ]
 
-        # patient_users = []
-        # for i, patient_data in enumerate(patients_data):
-        #     existing_patient = crud.get_user_by_email(db, email=patient_data["email"])
-        #     if not existing_patient:
-        #         patient_user_in = schemas.UserCreate(
-        #             username=patient_data["username"],
-        #             email=patient_data["email"],
-        #             password="patient123",
-        #             full_name=patient_data["full_name"],
-        #             role=UserRole.PATIENT
-        #         )
-        #         patient_user = crud.create_user(db=db, user=patient_user_in)
-        #         patient_users.append(patient_user)
+        patient_users = []
+        for i, patient_data in enumerate(patients_data):
+            existing_patient = crud.get_user_by_email(db, email=patient_data["email"])
+            if not existing_patient:
+                patient_user_in = schemas.UserCreate(
+                    username=patient_data["username"],
+                    email=patient_data["email"],
+                    password="patient123",
+                    full_name=patient_data["full_name"],
+                    role=UserRole.PATIENT
+                )
+                patient_user = crud.create_user(db=db, user=patient_user_in)
+                patient_users.append(patient_user)
                 
-        #         patient_user_id = getattr(patient_user, 'user_id')
-        #         print(f"✅ Patient created: {patient_user.full_name} (ID: {patient_user_id})")
-        #     else:
-        #         patient_users.append(existing_patient)
-        #         print(f"⚠️  Patient already exists: {patient_data['email']}")
+                patient_user_id = getattr(patient_user, 'user_id')
+                print(f"✅ Patient created: {patient_user.full_name} (ID: {patient_user_id})")
+            else:
+                patient_users.append(existing_patient)
+                print(f"⚠️  Patient already exists: {patient_data['email']}")
 
         print(f"\n🎉 Initial user creation completed!")
         print(f"📊 Summary:")
@@ -166,8 +166,8 @@ async def create_initial_users():
         print(f"   - 1 Default hospital")
         print(f"   - {len(doctors_data)} Doctor users")
         print(f"   - {len(staff_data)} Clinic staff users") 
-        # print(f"   - {len(patients_data)} Patient users")
-        # print(f"   - Total: {1 + len(doctors_data) + len(staff_data) + len(patients_data)} users")
+        print(f"   - {len(patients_data)} Patient users")
+        print(f"   - Total: {1 + len(doctors_data) + len(staff_data) + len(patients_data)} users")
 
     except Exception as e:
         print(f"❌ An error occurred: {e}")

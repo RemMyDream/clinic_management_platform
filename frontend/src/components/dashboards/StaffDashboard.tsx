@@ -56,7 +56,7 @@ const StaffDashboard = () => {
                 patientApi.getById(a.patient_id),
                 doctorApi.getById(a.doctor_id),
               ]);
-              return { ...a, patientName: patRes.data.full_name, doctorName: docRes.data.doctor_name };
+              return { ...a, patientName: patRes.data?.full_name || 'Bệnh nhân không xác định', doctorName: docRes.data?.doctor_name || 'Bác sĩ không xác định' };
             } catch {
               return { ...a, patientName: 'Bệnh nhân không xác định', doctorName: 'Bác sĩ không xác định' };
             }

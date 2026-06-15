@@ -120,8 +120,8 @@ class AppointmentRepository:
         doctors = db.query(Doctor).all()
         appointments = db.query(Appointment).filter(
             Appointment.appointment_day == day,
-            Appointment.status != AppointmentStatus.PENDING,
             Appointment.status != AppointmentStatus.CANCELED,
+            Appointment.status != AppointmentStatus.NO_SHOW,
         ).all()
         taken_slots = set((appt.doctor_id, appt.appointment_time) for appt in appointments)
 
