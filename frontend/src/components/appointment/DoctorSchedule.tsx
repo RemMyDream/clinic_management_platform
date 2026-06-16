@@ -32,10 +32,10 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_BADGE: Record<string, string> = {
   Pending: styles.statusWarning,
   Confirmed: styles.statusPrimary,
-  Scheduled: styles.statusSuccess,
+  Scheduled: styles.statusScheduled,
   Completed: styles.statusSuccess,
   Canceled: styles.statusError,
-  'No Show': styles.statusWarning,
+  'No Show': styles.statusDefault,
 };
 
 const DoctorSchedule = () => {

@@ -134,7 +134,7 @@
   background: linear-gradient(135deg, #2c3e50, #34495e);
   color: #fff;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: none;
@@ -151,7 +151,17 @@
 
 .appointments-table tbody td {
   color: #4a5568;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
+}
+
+.appointments-table .MuiChip-root {
+  height: auto;
+  padding: 4px 2px;
+}
+
+.appointments-table .MuiChip-label {
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 @media (max-width: 600px) {
@@ -264,11 +274,12 @@
   letter-spacing: 0.2px;
 }
 
-.apptm-badge-warning { background: #FEF3C7; color: #B45309; }
-.apptm-badge-primary { background: #DBEAFE; color: #1D4ED8; }
-.apptm-badge-success { background: #D1FAE5; color: #047857; }
-.apptm-badge-error   { background: #FEE2E2; color: #B91C1C; }
-.apptm-badge-default { background: #E2E8F0; color: #475569; }
+.apptm-badge-warning   { background: #FEF3C7; color: #B45309; }
+.apptm-badge-primary   { background: #DBEAFE; color: #1D4ED8; }
+.apptm-badge-scheduled { background: #E0E7FF; color: #4338CA; }
+.apptm-badge-success   { background: #D1FAE5; color: #047857; }
+.apptm-badge-error     { background: #FEE2E2; color: #B91C1C; }
+.apptm-badge-default   { background: #E2E8F0; color: #475569; }
 
 /* Info rows */
 .apptm-info {

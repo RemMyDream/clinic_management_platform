@@ -1,160 +1,524 @@
 .createEmrContainer {
-  max-width: 100%;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 20px;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 32px 40px 40px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
 }
 
 .title {
   font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
+  font-weight: 800;
+  margin: 0 0 1.5rem;
   text-align: center;
-  color: #2d3748;
+  color: #0f172a;
+  position: relative;
+  padding-bottom: 14px;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #2563eb, #0ea5e9);
+}
+
+/* ── Step indicator ─────────────────────────────────────────────── */
+.stepBar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 2rem;
+}
+
+.stepItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.stepDot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  background: #e2e8f0;
+  color: #94a3b8;
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+
+.stepDotActive {
+  background: #2563eb;
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18);
+}
+
+.stepDotDone {
+  background: #10b981;
+  color: #fff;
+}
+
+.stepLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.stepLabelActive {
+  color: #2563eb;
+}
+
+.stepLine {
+  flex: 1;
+  max-width: 70px;
+  height: 3px;
+  background: #e2e8f0;
+  margin-top: 18px;
+  transition: background 0.3s;
+}
+
+.stepLineDone {
+  background: #10b981;
 }
 
 .subtitle {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.3rem;
+  font-weight: 700;
   margin-bottom: 1rem;
-  color: #4a5568;
+  color: #1e293b;
+  text-align: left;
 }
 
 .emrForm,
 .prescriptionForm,
 .reviewEmr {
-  margin-top: 20px;
+  margin-top: 8px;
 }
 
 .formGroup {
-  margin-bottom: 15px;
+  margin-bottom: 18px;
+  text-align: left;
 }
 
 .label {
-  font-weight: bold;
-  margin-bottom: 5px;
+  font-weight: 700;
+  margin-bottom: 8px;
   display: block;
+  text-align: left;
+  color: #334155;
+  font-size: 0.98rem;
 }
 
 .input,
 .textarea {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #f8fafc;
+  color: #0f172a;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
 }
 
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────── */
 .button {
-  background-color: #70a1ff;
-  color: white;
-  padding: 10px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  padding: 12px 22px;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
-  margin-right: 10px;
+  margin-right: 12px;
+  margin-top: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: all 0.2s;
 }
 
 .button:hover {
-  background-color: #1e90ff;
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28);
 }
 
 .button:disabled {
-  background-color: #ccc;
+  background: #cbd5e1;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
-.medicationList {
-  list-style: none;
-  padding: 0;
+/* ── Colored sections ───────────────────────────────────────────── */
+.vitalSignsSection,
+.historySection {
+  margin: 22px 0;
+  padding: 20px 22px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
 }
 
-.medicationListItem {
-  margin-bottom: 10px;
+.vitalSignsSection {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
 }
 
+.historySection {
+  background: #faf5ff;
+  border-color: #e9d5ff;
+}
+
+.sectionTitle {
+  display: inline-block;
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 16px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border-bottom: none;
+}
+
+.vitalSignsSection .sectionTitle {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.historySection .sectionTitle {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.vitalSignsGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+}
+
+/* Dosage morning/evening */
+.doseGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.doseSubLabel {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.vitalSignsSection .input {
+  background: #ffffff;
+}
+
+/* ── Messages ───────────────────────────────────────────────────── */
 .errorMessage {
-  color: #e53e3e;
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 12px 16px;
+  border-radius: 10px;
   margin-bottom: 1rem;
   text-align: center;
+  font-weight: 600;
 }
 
 .successMessage {
-  color: #38a169;
+  color: #047857;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 12px 16px;
+  border-radius: 10px;
   margin-bottom: 1rem;
   text-align: center;
+  font-weight: 600;
 }
 
+/* ── Patient selection ──────────────────────────────────────────── */
 .patientSelection {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
 .patientList {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
 }
 
 .patientButton {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
   text-align: left;
-  background-color: #ebf8ff;
-  color: #2c5282;
-  padding: 12px 16px;
-  border: none;
-  border-radius: 8px;
-  margin-bottom: 12px;
-  font-weight: 500;
+  background: #eff6ff;
+  color: #1e3a8a;
+  padding: 16px 18px;
+  border: 1.5px solid #bfdbfe;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.02rem;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.2s;
+}
+
+.patientButton::before {
+  content: '👤';
+  font-size: 1.2rem;
 }
 
 .patientButton:hover {
-  background-color: #bee3f8;
+  background: #dbeafe;
+  border-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.15);
 }
 
-.noPatients {
-  color: #718096;
+.noPatients,
+.loading {
+  color: #64748b;
+  padding: 12px 0;
 }
 
-/* Vital Signs Section */
-.vitalSignsSection {
-  margin: 20px 0;
-  padding: 15px;
-  background-color: #f8fafc;
-  border-radius: 8px;
+/* ── Prescription / Medication list ─────────────────────────────── */
+.medicationList {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.medicationListItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #f8fafc;
   border: 1px solid #e2e8f0;
+  border-left: 4px solid #f59e0b;
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: #1e293b;
 }
 
-.sectionTitle {
-  font-size: 1.1rem;
+/* ── Review step ────────────────────────────────────────────────── */
+.prescriptionForm h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 16px;
+  text-align: left;
+}
+
+.reviewEmr {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+}
+
+.reviewHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #fff;
+}
+
+.reviewHeaderIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.reviewHeader h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  text-align: left;
+}
+
+.reviewBody {
+  padding: 8px 24px;
+}
+
+.reviewRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}
+
+.reviewRow:last-child {
+  border-bottom: none;
+}
+
+.reviewLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.reviewValue {
+  font-size: 1.05rem;
   font-weight: 600;
-  margin-bottom: 15px;
-  color: #2d3748;
-  border-bottom: 2px solid #4299e1;
-  padding-bottom: 5px;
+  color: #0f172a;
 }
 
-.vitalSignsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
+/* Prescriptions */
+.prescBlock {
+  padding: 16px 24px;
+  border-top: 1px solid #f1f5f9;
 }
 
-/* Patient History Section */
-.historySection {
-  margin: 20px 0;
-  padding: 15px;
-  background-color: #f7fafc;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+.prescTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #b45309;
+  margin: 0 0 12px;
+  text-align: left;
+}
+
+.prescEmpty {
+  color: #94a3b8;
+  margin: 0;
+}
+
+.prescList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.prescItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-left: 4px solid #f59e0b;
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+
+.prescName {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 1.02rem;
+}
+
+.prescMeta {
+  color: #64748b;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+/* Actions */
+.reviewActions {
+  display: flex;
+  gap: 12px;
+  padding: 18px 24px 22px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.btnSave,
+.btnCancel {
+  padding: 13px 28px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnSave {
+  background: #10b981;
+  color: #fff;
+}
+
+.btnSave:hover {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+}
+
+.btnCancel {
+  background: #fff;
+  color: #64748b;
+  border: 1.5px solid #e2e8f0;
+}
+
+.btnCancel:hover {
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .createEmrContainer {
+    padding: 20px 16px 28px;
+  }
+
   .vitalSignsGrid {
     grid-template-columns: 1fr;
+  }
+
+  .stepLabel {
+    display: none;
   }
 }

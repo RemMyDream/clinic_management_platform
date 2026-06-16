@@ -293,6 +293,7 @@
 
 .statusWarning { background: #FEF3C7; color: #B45309; }
 .statusPrimary { background: #DBEAFE; color: #1D4ED8; }
+.statusScheduled { background: #E0E7FF; color: #4338CA; }
 .statusSuccess { background: #D1FAE5; color: #047857; }
 .statusError { background: #FEE2E2; color: #B91C1C; }
 .statusDefault { background: #E2E8F0; color: #475569; }

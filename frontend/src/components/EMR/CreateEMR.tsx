@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 import { appointmentApi, patientApi, medicalReportApi, prescriptionApi } from '../../services/api';
 import styles from './CreateEMR.module.css';
 
@@ -14,6 +18,7 @@ interface PrescriptionItem {
 }
 
 interface FormData {
+  in_day: string;
   in_diagnosis: string;
   doctor_notes: string;
   reason_in: string;
@@ -27,7 +32,10 @@ interface FormData {
   family_history: string;
 }
 
-const EMPTY_FORM: FormData = {
+const todayStr = () => dayjs().format('YYYY-MM-DD');
+
+const emptyForm = (): FormData => ({
+  in_day: todayStr(),
   in_diagnosis: '',
   doctor_notes: '',
   reason_in: '',
@@ -39,14 +47,15 @@ const EMPTY_FORM: FormData = {
   weight: '',
   personal_history: '',
   family_history: '',
-};
+});
 
 const CreateEMR: React.FC = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
-  const [formData, setFormData] = useState<FormData>(EMPTY_FORM);
+  const [formData, setFormData] = useState<FormData>(emptyForm());
   const [prescriptions, setPrescriptions] = useState<PrescriptionItem[]>([]);
   const [newMed, setNewMed] = useState<PrescriptionItem>({ medication_name: '', dosage: '', quantity: '' });
+  const [dose, setDose] = useState({ morning: '', evening: '' });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [step, setStep] = useState(1);
@@ -83,8 +92,10 @@ const CreateEMR: React.FC = () => {
 
   const handleAddMedication = () => {
     if (!newMed.medication_name.trim()) return;
-    setPrescriptions((prev) => [...prev, { ...newMed }]);
+    const dosage = `Sáng ${dose.morning || 0} viên, chiều ${dose.evening || 0} viên / ngày`;
+    setPrescriptions((prev) => [...prev, { ...newMed, dosage }]);
     setNewMed({ medication_name: '', dosage: '', quantity: '' });
+    setDose({ morning: '', evening: '' });
   };
 
   const handleRemoveMedication = (index: number) => {
@@ -92,7 +103,7 @@ const CreateEMR: React.FC = () => {
   };
 
   const handleReset = () => {
-    setFormData(EMPTY_FORM);
+    setFormData(emptyForm());
     setPrescriptions([]);
     setError('');
     setSuccess('');
@@ -122,6 +133,8 @@ const CreateEMR: React.FC = () => {
         reason_in: formData.reason_in,
         treatment_process: formData.treatment_process,
       };
+
+      if (formData.in_day) emrPayload.in_day = formData.in_day;
 
       if (formData.pulse_rate) emrPayload.pulse_rate = formData.pulse_rate;
       if (formData.temperature) emrPayload.temperature = formData.temperature;
@@ -164,6 +177,26 @@ const CreateEMR: React.FC = () => {
   return (
     <div className={styles.createEmrContainer}>
       <h1 className={styles.title}>Tạo Hồ sơ Bệnh án</h1>
+
+      <div className={styles.stepBar}>
+        {(['Chọn bệnh nhân', 'Thông tin', 'Đơn thuốc', 'Xem lại'] as const).map((label, i) => {
+          const num = i + 1;
+          const isDone = step > num;
+          const isActive = step === num;
+          return (
+            <React.Fragment key={num}>
+              {i > 0 && <div className={`${styles.stepLine} ${step > i ? styles.stepLineDone : ''}`} />}
+              <div className={styles.stepItem}>
+                <div className={`${styles.stepDot} ${isDone ? styles.stepDotDone : isActive ? styles.stepDotActive : ''}`}>
+                  {isDone ? '✓' : num}
+                </div>
+                <span className={`${styles.stepLabel} ${isActive ? styles.stepLabelActive : ''}`}>{label}</span>
+              </div>
+            </React.Fragment>
+          );
+        })}
+      </div>
+
       {error && <p className={styles.errorMessage}>{error}</p>}
       {success && <p className={styles.successMessage}>{success}</p>}
 
@@ -195,6 +228,17 @@ const CreateEMR: React.FC = () => {
       {/* Step 2: EMR Form */}
       {step === 2 && (
         <div className={styles.emrForm}>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Ngày nhập viện:</label>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                value={formData.in_day ? dayjs(formData.in_day) : null}
+                onChange={(v) => setFormData((prev) => ({ ...prev, in_day: v ? v.format('YYYY-MM-DD') : '' }))}
+                format="DD/MM/YYYY"
+                slotProps={{ textField: { size: 'small', fullWidth: true } }}
+              />
+            </LocalizationProvider>
+          </div>
           <div className={styles.formGroup}>
             <label htmlFor="reason_in" className={styles.label}>Lý do nhập viện:</label>
             <textarea id="reason_in" name="reason_in" value={formData.reason_in} onChange={handleChange} required className={styles.textarea} />
@@ -273,24 +317,41 @@ const CreateEMR: React.FC = () => {
             />
           </div>
           <div className={styles.formGroup}>
-            <label className={styles.label}>Liều dùng:</label>
-            <input
-              type="text"
-              value={newMed.dosage}
-              onChange={(e) => setNewMed((p) => ({ ...p, dosage: e.target.value }))}
-              className={styles.input}
-              placeholder="ví dụ: 1 viên/ngày"
-            />
+            <label className={styles.label}>Liều dùng (số viên mỗi buổi):</label>
+            <div className={styles.doseGrid}>
+              <div>
+                <span className={styles.doseSubLabel}>Sáng</span>
+                <input
+                  type="number"
+                  min="0"
+                  value={dose.morning}
+                  onChange={(e) => setDose((p) => ({ ...p, morning: e.target.value }))}
+                  className={styles.input}
+                  placeholder="số viên"
+                />
+              </div>
+              <div>
+                <span className={styles.doseSubLabel}>Chiều</span>
+                <input
+                  type="number"
+                  min="0"
+                  value={dose.evening}
+                  onChange={(e) => setDose((p) => ({ ...p, evening: e.target.value }))}
+                  className={styles.input}
+                  placeholder="số viên"
+                />
+              </div>
+            </div>
           </div>
           <div className={styles.formGroup}>
-            <label className={styles.label}>Số lượng:</label>
+            <label className={styles.label}>Số ngày:</label>
             <input
               type="number"
               min="0"
               value={newMed.quantity}
               onChange={(e) => setNewMed((p) => ({ ...p, quantity: e.target.value }))}
               className={styles.input}
-              placeholder="ví dụ: 30"
+              placeholder="ví dụ: 7"
             />
           </div>
           <button className={styles.button} onClick={handleAddMedication}>Thêm thuốc</button>
@@ -299,7 +360,7 @@ const CreateEMR: React.FC = () => {
             <ul className={styles.medicationList}>
               {prescriptions.map((med, i) => (
                 <li key={i} className={styles.medicationListItem}>
-                  <strong>{med.medication_name}</strong> — Liều: {med.dosage}, SL: {med.quantity}
+                  <strong>{med.medication_name}</strong> — {med.dosage} · Số ngày: {med.quantity}
                   <button onClick={() => handleRemoveMedication(i)} style={{ marginLeft: 8, color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
                 </li>
               ))}
@@ -314,23 +375,58 @@ const CreateEMR: React.FC = () => {
       {/* Step 4: Review */}
       {step === 4 && (
         <div className={styles.reviewEmr}>
-          <h2>Xem lại Hồ sơ Bệnh án</h2>
-          <p><strong>Lý do nhập viện:</strong> {formData.reason_in}</p>
-          <p><strong>Chẩn đoán:</strong> {formData.in_diagnosis}</p>
-          <p><strong>Ghi chú tư vấn:</strong> {formData.doctor_notes}</p>
-          <p><strong>Quá trình điều trị:</strong> {formData.treatment_process}</p>
-          {prescriptions.length > 0 && (
-            <>
-              <h3>Đơn thuốc:</h3>
-              <ul>
+          <div className={styles.reviewHeader}>
+            <span className={styles.reviewHeaderIcon}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+            </span>
+            <h2>Xem lại Hồ sơ Bệnh án</h2>
+          </div>
+
+          <div className={styles.reviewBody}>
+            <div className={styles.reviewRow}>
+              <span className={styles.reviewLabel}>Ngày nhập viện</span>
+              <span className={styles.reviewValue}>{formData.in_day ? dayjs(formData.in_day).format('DD/MM/YYYY') : '—'}</span>
+            </div>
+            <div className={styles.reviewRow}>
+              <span className={styles.reviewLabel}>Lý do nhập viện</span>
+              <span className={styles.reviewValue}>{formData.reason_in || '—'}</span>
+            </div>
+            <div className={styles.reviewRow}>
+              <span className={styles.reviewLabel}>Chẩn đoán</span>
+              <span className={styles.reviewValue}>{formData.in_diagnosis || '—'}</span>
+            </div>
+            <div className={styles.reviewRow}>
+              <span className={styles.reviewLabel}>Ghi chú tư vấn</span>
+              <span className={styles.reviewValue}>{formData.doctor_notes || 'Không có'}</span>
+            </div>
+            <div className={styles.reviewRow}>
+              <span className={styles.reviewLabel}>Quá trình điều trị</span>
+              <span className={styles.reviewValue}>{formData.treatment_process || '—'}</span>
+            </div>
+          </div>
+
+          <div className={styles.prescBlock}>
+            <h3 className={styles.prescTitle}>💊 Đơn thuốc ({prescriptions.length})</h3>
+            {prescriptions.length === 0 ? (
+              <p className={styles.prescEmpty}>Không có đơn thuốc.</p>
+            ) : (
+              <div className={styles.prescList}>
                 {prescriptions.map((med, i) => (
-                  <li key={i}><strong>{med.medication_name}</strong> — Liều: {med.dosage}, SL: {med.quantity}</li>
+                  <div key={i} className={styles.prescItem}>
+                    <span className={styles.prescName}>{med.medication_name}</span>
+                    <span className={styles.prescMeta}>{med.dosage} · Số ngày: {med.quantity || '—'}</span>
+                  </div>
                 ))}
-              </ul>
-            </>
-          )}
-          <button className={styles.button} onClick={handleSaveEMR}>Lưu hồ sơ</button>
-          <button className={styles.button} onClick={handleReset}>Hủy</button>
+              </div>
+            )}
+          </div>
+
+          <div className={styles.reviewActions}>
+            <button className={styles.btnSave} onClick={handleSaveEMR}>Lưu hồ sơ</button>
+            <button className={styles.btnCancel} onClick={() => setStep(3)}>← Quay lại</button>
+          </div>
         </div>
       )}
     </div>

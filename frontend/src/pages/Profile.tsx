@@ -309,24 +309,46 @@ const Profile: React.FC = () => {
     };
 
     if (loading) {
-        return <div className={styles['profile-container']}>Đang tải...</div>;
+        return <div className={styles['profile-container']}><div className={styles['profile-loading']}>Đang tải...</div></div>;
     }
 
-    if (error) {
-        return <div className={styles['profile-container']}>{error}</div>;
+    if (error && !editMode) {
+        return <div className={styles['profile-container']}><div className={styles['profile-error']}>{error}</div></div>;
     }
+
+    const isDoctor = 'doctor_id' in userData;
+    const isPatient = 'patient_id' in userData;
+    const roleLabel = isDoctor
+        ? 'Bác sĩ'
+        : isPatient
+            ? 'Bệnh nhân'
+            : (localStorage.getItem('role') === 'ADMIN' ? 'Quản trị viên' : 'Nhân viên phòng khám');
+    const displayName = (userData as any).doctor_name || userData.full_name || userData.username || 'Người dùng';
+    const initial = displayName.charAt(0).toUpperCase();
 
     return (
         <div className={styles['profile-container']}>
-            <button onClick={() => navigate('/dashboard')} className={styles['profile-button']} style={{marginBottom: 16}}>Về trang chủ</button>
-            <h1 className={styles['profile-title']}>Hồ sơ người dùng</h1>
+            <button onClick={() => navigate('/dashboard')} className={styles['profile-back']}>← Về trang chủ</button>
+
+            <div className={styles['profile-banner']}>
+                <div className={styles['profile-avatar']}>{initial}</div>
+                <div className={styles['profile-banner-info']}>
+                    <h1 className={styles['profile-banner-name']}>{displayName}</h1>
+                    <p className={styles['profile-banner-email']}>{safeDisplay(userData.email)}</p>
+                    <span className={styles['profile-role-chip']}>{roleLabel}</span>
+                </div>
+                {!editMode && (
+                    <button onClick={handleEdit} className={styles['profile-edit-btn']}>✏️ Chỉnh sửa</button>
+                )}
+            </div>
+
             {error && <div className={styles['profile-error']}>{error}</div>}
+
             {editMode ? (
                 renderEditForm()
             ) : (
                 <div className={styles['profile-details']}>
                     {renderProfileDetails()}
-                    <button onClick={handleEdit} className={styles['profile-button']}>Chỉnh sửa hồ sơ</button>
                 </div>
             )}
         </div>

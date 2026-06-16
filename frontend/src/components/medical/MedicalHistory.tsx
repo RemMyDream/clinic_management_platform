@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -39,12 +40,16 @@ type SearchFilters = {
 };
 
 const MedicalHistory = () => {
+  const [searchParams] = useSearchParams();
+  const patientIdParam = searchParams.get('patient_id');
   const [medicalReports, setMedicalReports] = useState<MedicalReport[]>([]);
   const [filteredReports, setFilteredReports] = useState<MedicalReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedReport, setSelectedReport] = useState<MedicalReport | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 2;
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({
     diagnosis: '',
     dateFrom: '',
@@ -54,16 +59,28 @@ const MedicalHistory = () => {
 
   useEffect(() => {
     fetchMedicalHistory();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patientIdParam]);
 
   useEffect(() => {
     applyFilters();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [medicalReports, searchFilters]);
 
+  // Reset về trang 1 khi đổi bộ lọc hoặc chế độ xem
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchFilters, viewMode, medicalReports]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredReports.length / PAGE_SIZE));
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+
   const fetchMedicalHistory = async () => {
+    setLoading(true);
     try {
-      const res = await medicalReportApi.getAll();
+      const res = patientIdParam
+        ? await medicalReportApi.search({ patient_id: Number(patientIdParam) })
+        : await medicalReportApi.getAll();
       setMedicalReports(res.data);
     } catch {
       setError('Không thể tải lịch sử bệnh án.');
@@ -101,6 +118,7 @@ const MedicalHistory = () => {
       });
     }
 
+    filtered.sort((a, b) => a.record_id - b.record_id);
     setFilteredReports(filtered);
   };
 
@@ -205,12 +223,36 @@ const MedicalHistory = () => {
     }
   };
 
-  const renderTimelineView = () => {
-    const sortedReports = [...filteredReports].sort((a, b) => 
-      new Date(b.in_day).getTime() - new Date(a.in_day).getTime()
+  const renderPagination = () => {
+    if (filteredReports.length <= PAGE_SIZE) return null;
+    return (
+      <div className={styles.pagination}>
+        <button
+          className={styles.pageBtn}
+          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+          disabled={currentPage <= 1}
+        >
+          ← Trước
+        </button>
+        <span className={styles.pageInfo}>Trang {currentPage} / {totalPages}</span>
+        <button
+          className={styles.pageBtn}
+          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+          disabled={currentPage >= totalPages}
+        >
+          Sau →
+        </button>
+      </div>
     );
+  };
+
+  const renderTimelineView = () => {
+    const sortedReports = [...filteredReports]
+      .sort((a, b) => new Date(b.in_day).getTime() - new Date(a.in_day).getTime())
+      .slice(pageStart, pageStart + PAGE_SIZE);
 
     return (
+      <>
       <div className={styles.timelineContainer}>
         <div className={styles.timeline}>
           {sortedReports.map((report, index) => (
@@ -252,6 +294,8 @@ const MedicalHistory = () => {
           ))}
         </div>
       </div>
+      {renderPagination()}
+      </>
     );
   };
 
@@ -392,19 +436,18 @@ const MedicalHistory = () => {
                     <p>Không tìm thấy báo cáo phù hợp với tiêu chí tìm kiếm.</p>
                   </div>
                 ) : (
-                  filteredReports.map((report) => (
-                    <div
-                      key={report.record_id}
-                      className={`${styles.reportCard} ${selectedReport?.record_id === report.record_id ? styles.selected : ''}`}
-                      onClick={() => handleReportSelect(report)}
-                    >
-                      <div className={styles.reportHeader}>
+                  filteredReports.slice(pageStart, pageStart + PAGE_SIZE).map((report) => (
+                    <div key={report.record_id} className={styles.timelineContent}>
+                      <div className={styles.timelineHeader}>
                         <h4>Báo cáo #{report.record_id}</h4>
-                        <span className={styles.date}>{formatDate(report.in_day)}</span>
+                        <span className={styles.timelineDate}>{formatDate(report.in_day)}</span>
                       </div>
-                      <div className={styles.reportPreview}>
+                      <div className={styles.timelineBody}>
                         <p><strong>Chẩn đoán:</strong> {report.in_diagnosis || 'N/A'}</p>
                         <p><strong>Lý do:</strong> {report.reason_in || 'N/A'}</p>
+                        {report.treatment_process && <p><strong>Điều trị:</strong> {report.treatment_process}</p>}
+                      </div>
+                      <div className={styles.timelineFooter}>
                         <div className={styles.statusBadge}>
                           {report.out_day && report.out_day !== '' ? (
                             <span className={styles.completed}>Hoàn thành</span>
@@ -412,14 +455,21 @@ const MedicalHistory = () => {
                             <span className={styles.active}>Đang điều trị</span>
                           )}
                         </div>
+                        <button className={styles.viewDetailsButton} onClick={() => handleReportSelect(report)}>
+                          Xem chi tiết
+                        </button>
                       </div>
                     </div>
                   ))
                 )}
+                {renderPagination()}
               </div>
+            </div>
+          )}
 
-              {selectedReport && (
-                <div className={styles.reportDetails}>
+          {selectedReport && (
+            <div className={styles.modalOverlay} onClick={handleCloseDetails}>
+              <div className={styles.reportDetails} onClick={(e) => e.stopPropagation()}>
                   <div className={styles.detailsHeader}>
                     <h3>Báo cáo y tế #{selectedReport.record_id}</h3>
                     <button className={styles.closeButton} onClick={handleCloseDetails}>×</button>
@@ -519,8 +569,7 @@ const MedicalHistory = () => {
                     )}
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
           )}
         </>
       )}

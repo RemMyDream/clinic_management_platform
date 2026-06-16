@@ -41,6 +41,13 @@ interface PatientSearchResponse {
   total_pages: number;
 }
 
+const ROLE_LABEL: Record<string, string> = {
+  CLINIC_STAFF: 'Nhân viên phòng khám',
+  DOCTOR: 'Bác sĩ',
+  ADMIN: 'Quản trị viên',
+  PATIENT: 'Bệnh nhân',
+};
+
 const PatientSearch: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useState<PatientSearchQuery>({
@@ -156,8 +163,8 @@ const PatientSearch: React.FC = () => {
       <div className="search-header">
         <h2>Tra cứu thông tin bệnh nhân</h2>
         <p className="role-info">
-          Tìm kiếm với vai trò: <strong>Nhân viên phòng khám</strong>
-          {userRole === 'PATIENT' && ' (You can only view your own records)'}
+          Tìm kiếm với vai trò: <strong>{ROLE_LABEL[userRole] || userRole}</strong>
+          {userRole === 'PATIENT' && ' (Bạn chỉ có thể xem hồ sơ của chính mình)'}
         </p>
       </div>
 

@@ -4,7 +4,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { CircularProgress, Modal, Box, Chip } from '@mui/material';
+import { CircularProgress, Modal, Box } from '@mui/material';
 import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
 import dayjs, { Dayjs } from 'dayjs';
 import { toast } from 'react-toastify';
@@ -24,15 +24,6 @@ type Appointment = {
   doctorName?: string;
 };
 
-const STATUS_COLOR: Record<string, 'default' | 'primary' | 'success' | 'error' | 'warning'> = {
-  Pending: 'warning',
-  Confirmed: 'primary',
-  Scheduled: 'success',
-  Completed: 'success',
-  Canceled: 'error',
-  'No Show': 'warning',
-};
-
 const STATUS_LABEL: Record<string, string> = {
   Pending: 'Chờ xác nhận',
   Confirmed: 'Đã xác nhận',
@@ -45,10 +36,10 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_BADGE: Record<string, string> = {
   Pending: 'apptm-badge-warning',
   Confirmed: 'apptm-badge-primary',
-  Scheduled: 'apptm-badge-success',
+  Scheduled: 'apptm-badge-scheduled',
   Completed: 'apptm-badge-success',
   Canceled: 'apptm-badge-error',
-  'No Show': 'apptm-badge-warning',
+  'No Show': 'apptm-badge-default',
 };
 
 const ViewAppointment = () => {
@@ -237,11 +228,9 @@ const ViewAppointment = () => {
                     <td>{a.reason}</td>
                     <td>{mapService(a.service)}</td>
                     <td>
-                      <Chip
-                        label={STATUS_LABEL[a.status] || a.status}
-                        color={STATUS_COLOR[a.status] || 'default'}
-                        size="small"
-                      />
+                      <span className={`apptm-status ${STATUS_BADGE[a.status] || 'apptm-badge-default'}`}>
+                        {STATUS_LABEL[a.status] || a.status}
+                      </span>
                     </td>
                   </tr>
                 ))}

@@ -15,6 +15,24 @@ type Appointment = {
   patientName?: string;
 };
 
+const STATUS_LABEL: Record<string, string> = {
+  Pending: 'Chờ xác nhận',
+  Confirmed: 'Đã xác nhận',
+  Scheduled: 'Đã lên lịch',
+  Completed: 'Hoàn thành',
+  Canceled: 'Đã hủy',
+  'No Show': 'Vắng mặt',
+};
+
+const STATUS_BADGE: Record<string, string> = {
+  Pending: styles.statusPending,
+  Confirmed: styles.statusConfirmed,
+  Scheduled: styles.statusScheduled,
+  Completed: styles.statusCompleted,
+  Canceled: styles.statusCanceled,
+  'No Show': styles.statusNoShow,
+};
+
 type DashboardStats = {
   todayAppointments: number;
   totalPatients: number;
@@ -101,8 +119,7 @@ const DoctorDashboard = () => {
     { title: 'Xem lịch trình đầy đủ', description: 'Quản lý lịch hẹn của bạn', icon: '📅', action: () => navigate('/dashboard/schedule'), color: '#3498db' },
     { title: 'Tìm kiếm bệnh nhân', description: 'Tìm và xem hồ sơ bệnh nhân', icon: '👥', action: () => navigate('/dashboard/patients'), color: '#27ae60' },
     { title: 'Tạo hồ sơ y tế', description: 'Ghi chép cuộc tư vấn bệnh nhân', icon: '📝', action: () => navigate('/dashboard/create_records'), color: '#e74c3c' },
-    { title: 'Báo cáo y tế', description: 'Quản lý báo cáo y tế của bạn', icon: '📊', action: () => navigate('/dashboard/medical-reports'), color: '#f39c12' },
-    { title: 'Tiền sử bệnh án', description: 'Xem tiền sử y tế của bệnh nhân', icon: '📋', action: () => navigate('/dashboard/medical-history'), color: '#9b59b6' },
+    { title: 'Hồ sơ & Báo cáo y tế', description: 'Xem, sửa và xuất báo cáo y tế bệnh nhân', icon: '📊', action: () => navigate('/dashboard/medical-reports'), color: '#f39c12' },
     { title: 'Đơn thuốc', description: 'Quản lý đơn thuốc bệnh nhân', icon: '💊', action: () => navigate('/dashboard/prescriptions'), color: '#1abc9c' },
   ];
 
@@ -173,14 +190,8 @@ const DoctorDashboard = () => {
                   <div>{a.patientName}</div>
                   <div className={styles.reasonCell}>{a.reason}</div>
                   <div>
-                    <span className={
-                      a.status === 'Completed' ? styles.statusCompleted :
-                      a.status === 'Canceled' ? styles.statusCanceled :
-                      styles.statusUpcoming
-                    }>
-                      {a.status === 'Completed' ? 'Hoàn thành' :
-                       a.status === 'Canceled' ? 'Đã hủy' :
-                       a.status === 'No Show' ? 'Vắng mặt' : 'Đã lên lịch'}
+                    <span className={`${styles.statusBadge} ${STATUS_BADGE[a.status] || styles.statusScheduled}`}>
+                      {STATUS_LABEL[a.status] || a.status}
                     </span>
                   </div>
                 </div>

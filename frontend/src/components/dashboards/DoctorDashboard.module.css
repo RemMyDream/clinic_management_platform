@@ -45,32 +45,29 @@
 /* Header */
 .header {
   margin-bottom: var(--spacing-10);
-  text-align: left; /* Fixed: was center-aligned */
-  padding: var(--spacing-8) 0;
-  background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--primary-200);
+  text-align: left;
+  padding: 24px 30px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.2);
   animation: fadeInUp 0.8s ease-out;
 }
 
 .title {
-  background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-800) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #ffffff;
   font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-bold);
-  margin: 0 0 var(--spacing-4) 0;
+  margin: 0 0 var(--spacing-2) 0;
   line-height: var(--line-height-tight);
   text-align: left;
 }
 
 .subtitle {
-  color: var(--secondary-600);
+  color: rgba(255, 255, 255, 0.9);
   font-size: var(--font-size-xl);
   margin: 0;
   font-weight: var(--font-weight-normal);
-  opacity: 0.8;
+  font-style: italic;
   text-align: left;
 }
 
@@ -347,38 +344,24 @@
   text-align: center;
 }
 
-.statusUpcoming {
-  background: var(--warning-500);
-  color: var(--warning-900);
-  padding: var(--spacing-1) var(--spacing-2);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
+/* Canonical status badge – đồng bộ màu giữa các trang */
+.statusBadge {
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
   text-align: center;
+  white-space: nowrap;
+  border: 1.5px solid transparent;
 }
 
-.statusCompleted {
-  background: var(--secondary-500);
-  color: var(--white);
-  padding: var(--spacing-1) var(--spacing-2);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  text-align: center;
-}
-
-.statusCanceled {
-  background: #ef4444;
-  color: var(--white);
-  padding: var(--spacing-1) var(--spacing-2);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  text-align: center;
-}
+.statusPending   { background: #FEF3C7; color: #B45309; border-color: #FDE68A; }
+.statusConfirmed { background: #DBEAFE; color: #1D4ED8; border-color: #BFDBFE; }
+.statusScheduled { background: #E0E7FF; color: #4338CA; border-color: #C7D2FE; }
+.statusCompleted { background: #D1FAE5; color: #047857; border-color: #A7F3D0; }
+.statusCanceled  { background: #FEE2E2; color: #B91C1C; border-color: #FECACA; }
+.statusNoShow    { background: #E2E8F0; color: #475569; border-color: #CBD5E1; }
 
 .emptyState {
   background: var(--white);
