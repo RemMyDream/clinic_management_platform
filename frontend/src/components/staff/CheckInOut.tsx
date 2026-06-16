@@ -26,7 +26,8 @@ const STATUS_LABEL: Record<string, string> = {
 
 const CheckInOut: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [patientQuery, setPatientQuery] = useState('');
+  const [doctorQuery, setDoctorQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'scheduled' | 'completed'>('scheduled');
 
@@ -100,16 +101,13 @@ const CheckInOut: React.FC = () => {
   };
 
   const filtered = appointments.filter((a) => {
-    const q = searchQuery.toLowerCase();
-    const matchSearch =
-      (a.patientName || '').toLowerCase().includes(q) ||
-      (a.doctorName || '').toLowerCase().includes(q) ||
-      a.reason.toLowerCase().includes(q);
+    const matchPatient = (a.patientName || '').toLowerCase().includes(patientQuery.toLowerCase());
+    const matchDoctor = (a.doctorName || '').toLowerCase().includes(doctorQuery.toLowerCase());
     const matchTab =
       activeTab === 'scheduled'
         ? (a.status === 'Scheduled' || a.status === 'Confirmed')
         : a.status === 'Completed';
-    return matchSearch && matchTab;
+    return matchPatient && matchDoctor && matchTab;
   });
 
   const scheduledCount = appointments.filter((a) => a.status === 'Scheduled' || a.status === 'Confirmed').length;
@@ -157,15 +155,28 @@ const CheckInOut: React.FC = () => {
         </div>
       </div>
 
-      {/* Search */}
+      {/* Filters */}
       <div className={styles.searchContainer}>
-        <input
-          type="text"
-          placeholder="Tìm kiếm bệnh nhân, bác sĩ hoặc lý do..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className={styles.searchInput}
-        />
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Lọc theo bệnh nhân</label>
+          <input
+            type="text"
+            placeholder="Nhập tên bệnh nhân..."
+            value={patientQuery}
+            onChange={(e) => setPatientQuery(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>Lọc theo bác sĩ</label>
+          <input
+            type="text"
+            placeholder="Nhập tên bác sĩ..."
+            value={doctorQuery}
+            onChange={(e) => setDoctorQuery(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
       </div>
 
       {/* Tabs */}

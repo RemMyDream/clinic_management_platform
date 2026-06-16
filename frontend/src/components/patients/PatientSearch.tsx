@@ -61,6 +61,9 @@ const PatientSearch: React.FC = () => {
   useEffect(() => {
     const role = localStorage.getItem('role') || '';
     setUserRole(role);
+    // Tự động tìm kiếm (không filter) khi mới vào trang
+    handleSearch(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSearch = async (page: number = 1) => {
@@ -151,10 +154,10 @@ const PatientSearch: React.FC = () => {
   return (
     <div className="patient-search-container">
       <div className="search-header">
-        <h2>Tìm Kiếm Bệnh Nhân</h2>
+        <h2>Tra cứu thông tin bệnh nhân</h2>
         <p className="role-info">
-          Đang tìm kiếm với vai trò: <strong>{userRole}</strong>
-          {userRole === 'PATIENT' && ' (Bạn chỉ có thể xem hồ sơ của chính mình)'}
+          Tìm kiếm với vai trò: <strong>Nhân viên phòng khám</strong>
+          {userRole === 'PATIENT' && ' (You can only view your own records)'}
         </p>
       </div>
 
@@ -439,7 +442,7 @@ const PatientSearch: React.FC = () => {
                             >
                               Hồ Sơ Y Tế
                             </button>
-                            {(userRole === 'DOCTOR' || userRole === 'CLINIC_STAFF') && (
+                            {(userRole === 'DOCTOR' || userRole === 'ADMIN') && (
                               <button
                                 className="create-emr-btn"
                                 onClick={() => navigateToCreateEMR(patient.patient_id)}
@@ -546,7 +549,7 @@ const PatientSearch: React.FC = () => {
                   >
                     📋 Xem Hồ Sơ Y Tế
                   </button>
-                  {(userRole === 'DOCTOR' || userRole === 'CLINIC_STAFF') && (
+                  {(userRole === 'DOCTOR' || userRole === 'ADMIN') && (
                     <button
                       className="modal-create-emr-btn"
                       onClick={() => {

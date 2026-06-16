@@ -283,7 +283,7 @@
   margin-top: 20px;
 }
 
-button {
+.schedule-appointment button {
   padding: 12px 24px;
   border: none;
   border-radius: 8px;
@@ -293,17 +293,17 @@ button {
   transition: all 0.3s ease;
 }
 
-button:disabled {
+.schedule-appointment button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-button:not(.back-button):not(:disabled) {
+.schedule-appointment button:not(.back-button):not(:disabled) {
   background: #3498db;
   color: white;
 }
 
-button:not(.back-button):not(:disabled):hover {
+.schedule-appointment button:not(.back-button):not(:disabled):hover {
   background: #2980b9;
   transform: translateY(-1px);
 }
